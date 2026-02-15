@@ -694,6 +694,20 @@
             color: #fff;
         }
 
+        @media (max-width: 768px) {
+            .popular-badge {
+                top: 3px;
+                left: 3px;
+                padding: 1px 4px;
+                font-size: 0.45rem;
+                gap: 2px;
+            }
+
+            .popular-badge i {
+                font-size: 0.5rem;
+            }
+        }
+
         .item-card.is-popular {
             border: 2px solid rgba(230, 126, 34, 0.3);
         }
@@ -841,6 +855,22 @@
             padding: 1.5rem;
             border-radius: 15px;
             backdrop-filter: blur(5px);
+        }
+
+        .stat-box.clickable {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .stat-box.clickable:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-box.clickable:active {
+            transform: scale(0.98);
         }
 
         .stat-label {
@@ -1072,10 +1102,17 @@
                 flex-direction: column;
             }
 
+            #history-items-panel.open {
+                display: flex !important;
+            }
+
             .history-scroll-area {
                 overflow-y: auto;
                 flex: 1;
                 padding-right: 5px;
+                -webkit-overflow-scrolling: touch;
+                /* Smooth scroll for iOS */
+                margin-bottom: 10px;
             }
 
             .detailed-bill-card {
@@ -1140,46 +1177,59 @@
             }
 
             .summary-header {
-                display: none;
-            }
-
-            .summary-stats {
-                display: flex;
-                gap: 10px;
-                width: 100%;
-            }
-
-            .stat-box {
-                flex: 1;
-                padding: 10px;
-                background: rgba(255, 255, 255, 0.15);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 2px;
-                border-radius: 12px;
-            }
-
-            .stat-label {
-                font-size: 0.6rem;
+                display: flex !important;
                 margin-bottom: 0;
-                color: white;
-                opacity: 0.8;
+                padding-bottom: 0;
+                border-bottom: none;
             }
 
-            .stat-value {
-                font-size: 1.1rem;
-            }
-
-            .analytics-actions {
-                margin-top: 10px;
-                gap: 8px;
-            }
-
-            .report-btn {
-                height: 40px;
+            .summary-header h2 {
+                font-size: 1rem;
             }
         }
+
+        .stat-box {
+            flex: 1;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            border-radius: 16px;
+            border: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box.clickable:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent);
+        }
+
+        .stat-box .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .stat-box .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-box.clickable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .report-btn {
+            height: 40px;
+        }
+
 
         /* Toast Notification */
         #toast {
@@ -2104,32 +2154,62 @@
         </section>
 
         <!-- Today's Summary -->
-        <section class="summary-panel">
-            <div class="summary-header">
-                <h2>Today's Summary</h2>
-                <i class="fas fa-chart-line"></i>
+        <section class="summary-panel" style="padding: 12px 15px;">
+            <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;"><i class="fas fa-chart-pie" style="margin-right: 8px; font-size: 0.9rem;"></i>
+                    Today's Summary</h2>
+                <button id="toggle-summary-btn" onclick="window.toggleSummaryModal()"
+                    style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-eye"></i>
+                </button>
             </div>
-            <div class="summary-stats">
-                <div class="stat-box" style="grid-column: 1 / -1; background: rgba(255,255,255,0.2);">
-                    <div class="stat-label">Total Sales</div>
-                    <div class="stat-value" id="summary-total-amount">₹0.00</div>
-                </div>
-                <div class="stat-box" style="background: rgba(39, 174, 96, 0.2);">
-                    <div class="stat-label">Cash Total</div>
-                    <div class="stat-value" id="summary-cash-amount">₹0.00</div>
-                </div>
-                <div class="stat-box" style="background: rgba(52, 152, 219, 0.2);">
-                    <div class="stat-label">Online Total</div>
-                    <div class="stat-value" id="summary-online-amount">₹0.00</div>
-                </div>
-                <div class="stat-box" style="grid-column: 1 / -1; opacity: 0.7;">
-                    <div class="stat-label">Items Sold</div>
-                    <div class="stat-value" id="summary-items-count">0</div>
-                </div>
-            </div>
-
-
         </section>
+
+        <!-- Today's Summary Modal -->
+        <div id="summary-modal-bg" class="modal-overlay" onclick="window.toggleSummaryModal()"></div>
+        <div id="summary-modal-panel" class="modal-card">
+            <div class="modal-header"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
+                <h3 style="margin:0; display:flex; align-items:center; gap:10px; color: var(--primary);">
+                    <i class="fas fa-chart-line" style="color: var(--accent);"></i> Today's Sales
+                </h3>
+                <button onclick="window.toggleSummaryModal()" class="close-btn"
+                    style="background:none; color:#999; border:none; font-size:1.5rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="summary-stats-popup" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <div class="stat-box clickable" style="background: #f8fafc;"
+                    onclick="window.toggleSummaryModal(); window.toggleHistoryView()" title="View History">
+                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-value" id="summary-total-amount" style="font-size: 1.8rem;">₹0.00</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="stat-box"
+                        style="background: rgba(39, 174, 96, 0.05); border-color: rgba(39, 174, 96, 0.1);">
+                        <div class="stat-label">Cash</div>
+                        <div class="stat-value" id="summary-cash-amount"
+                            style="color: var(--success); font-size: 1.2rem;">₹0.00</div>
+                    </div>
+                    <div class="stat-box"
+                        style="background: rgba(52, 152, 219, 0.05); border-color: rgba(52, 152, 219, 0.1);">
+                        <div class="stat-label">Online</div>
+                        <div class="stat-value" id="summary-online-amount" style="color: #3498db; font-size: 1.2rem;">
+                            ₹0.00</div>
+                    </div>
+                </div>
+                <div class="stat-box" style="background: #fff; border-style: dashed;">
+                    <div class="stat-label">Total Items Sold</div>
+                    <div class="stat-value" id="summary-items-count" style="font-size: 1.2rem;">0</div>
+                </div>
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="save-item-btn" style="width:100%; margin: 0; background: var(--primary);"
+                    onclick="window.toggleSummaryModal()">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>
 
         <!-- Monthly Analysis Panel -->
         <div id="modal-bg" class="modal-overlay" onclick="window.toggleMonthlyView()"></div>
@@ -3043,13 +3123,15 @@
         window.toggleHistoryView = () => {
             const panel = document.getElementById('history-items-panel');
             const bg = document.getElementById('history-modal-bg');
-            const isShowing = panel.style.display === 'block';
+            const isShowing = panel.classList.contains('open');
 
             if (isShowing) {
+                panel.classList.remove('open');
                 panel.style.display = 'none';
                 bg.style.display = 'none';
             } else {
-                panel.style.display = 'block';
+                panel.classList.add('open');
+                panel.style.display = 'flex';
                 bg.style.display = 'block';
             }
         };
@@ -3212,6 +3294,20 @@
         /**
          * Helper for Toast with robust timeout
          */
+        window.toggleSummaryModal = () => {
+            const panel = document.getElementById('summary-modal-panel');
+            const bg = document.getElementById('summary-modal-bg');
+            const isShowing = panel.style.display === 'block';
+
+            if (isShowing) {
+                panel.style.display = 'none';
+                if (bg) bg.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                if (bg) bg.style.display = 'block';
+            }
+        };
+
         let toastTimeout;
         function showToast(msg) {
             const toast = document.getElementById('toast');
