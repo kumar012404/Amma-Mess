@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Daily Sales Tracker</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 100px;
+            /* Space for summary footer on mobile */
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #34495e);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 0.8rem;
+                margin-bottom: 0.8rem;
+            }
+
+            header h1 {
+                font-size: 1.3rem;
+            }
+
+            header p {
+                font-size: 0.8rem;
+            }
+
+            .menu-manage-btn {
+                width: 35px;
+                height: 35px;
+                right: 10px;
+                font-size: 1rem;
+            }
+        }
+
+        header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.3rem;
+        }
+
+        header p {
+            font-weight: 300;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .menu-manage-btn {
+            position: absolute;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .menu-manage-btn:hover {
+            background: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        /* Manage Panel Refinement */
+        .manage-panel {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .panel-header h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-header h3 i {
+            color: var(--accent);
+            background: rgba(230, 126, 34, 0.1);
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .add-item-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #f0f2f5;
+            border-radius: 14px;
+            font-size: 1rem;
+            background: #f8fafc;
+            transition: all 0.3s;
+            color: var(--primary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 8px 20px rgba(230, 126, 34, 0.1);
+        }
+
+        .save-btn-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .save-item-btn {
+            background: linear-gradient(135deg, var(--primary), #1a252f);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.4s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(44, 62, 80, 0.3);
+        }
+
+        .save-item-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(44, 62, 80, 0.4);
+            background: linear-gradient(135deg, var(--accent), #d35400);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Session Switcher */
+        .session-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .session-btn {
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            padding: 0.8rem 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+        }
+
+        .session-btn i {
+            font-size: 1.2rem;
+        }
+
+        .session-btn.morning {
+            color: #f1c40f;
+        }
+
+        .session-btn.afternoon {
+            color: #e67e22;
+        }
+
+        .session-btn.night {
+            color: #9b59b6;
+        }
+
+        .session-btn.active {
+            border-color: currentColor;
+            transform: translateY(-5px);
+            background: white;
+        }
+
+        .session-btn:not(.active) {
+            opacity: 0.6;
+        }
+
+        /* Items Section */
+        .section-title {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #ddd;
+        }
+
+        /* Overall Items Styling */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #eee;
+            transition: transform 0.2s;
+        }
+
+        .item-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+            color: white;
+
+        }
+
+        .edit-btn {
+            background: rgba(52, 152, 219, 0.9);
+        }
+
+        .edit-btn:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+        }
+
+        .delete-btn {
+            background: rgba(231, 76, 60, 0.9);
+        }
+
+        .delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .item-image {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            background: #f0f0f0;
+        }
+
+        .item-details {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .item-card:active {
+            transform: scale(0.98);
+        }
+
+        .item-info h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            height: 2.6em;
+            overflow: hidden;
+            line-height: 1.3;
+        }
+
+        .item-info .price {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .item-controls {
+            display: flex;
+            gap: 4px;
+            margin-top: auto;
+        }
+
+        .qty-input {
+            width: 32px;
+            height: 30px;
+            padding: 2px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .add-btn {
+            flex: 1;
+            height: 30px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-btn:hover {
+            background: #219150;
+        }
+
+        .add-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        /* Summary Section */
+        .summary-panel {
+            margin-top: 3rem;
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(44, 62, 80, 0.2);
+        }
+
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        /* Extreme Mobile Adjustments for 4-column POS */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 90px;
+            }
+
+            .items-grid {
+                gap: 6px;
+            }
+
+            .item-image {
+                aspect-ratio: 16 / 9;
+            }
+
+            .item-details {
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .item-info h3 {
+                font-size: 0.65rem;
+                height: 2.2em;
+                margin-bottom: 2px;
+            }
+
+            .item-info .price {
+                font-size: 0.75rem;
+            }
+
+            .qty-input {
+                width: 24px;
+                height: 26px;
+                font-size: 0.75rem;
+                border-radius: 4px;
+            }
+
+            .add-btn {
+                height: 26px;
+                font-size: 0.65rem;
+                border-radius: 4px;
+                padding: 2px;
+            }
+
+            .action-btn {
+                width: 22px !important;
+                height: 22px !important;
+                font-size: 0.65rem !important;
+            }
+
+            .item-actions {
+                top: 4px;
+                right: 4px;
+                gap: 3px;
+            }
+
+            .summary-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: 0;
+                border-radius: 20px 20px 0 0;
+                padding: 15px;
+                z-index: 1000;
+                background: var(--primary);
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
+            }
+
+            .summary-header {
+                display: none;
+            }
+
+            .summary-stats {
+                display: flex;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .stat-box {
+                flex: 1;
+                padding: 10px;
+                background: rgba(255, 255, 255, 0.15);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 2px;
+                border-radius: 12px;
+            }
+
+            .stat-label {
+                font-size: 0.6rem;
+                margin-bottom: 0;
+                color: white;
+                opacity: 0.8;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+            }
+
+            .analytics-actions {
+                margin-top: 10px;
+                gap: 8px;
+            }
+
+            .report-btn {
+                height: 40px;
+            }
+        }
+
+        /* Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid rgba(0, 0, 0, 0.1);
+            border-bottom-color: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Orders List Styles - Line Wise */
+        .orders-list {
+            margin-bottom: 2rem;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .order-item {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-num {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            width: 25px;
+        }
+
+        .order-details-row {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .order-main-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-name-qty {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .order-time-tag {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .payment-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .dot-cash {
+            background: var(--success);
+        }
+
+        .dot-online {
+            background: #3498db;
+        }
+
+        .order-total-price {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .delete-order-btn {
+            background: transparent;
+            color: #ccc;
+            border: none;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .delete-order-btn:hover {
+            color: #ff4d4d;
+            transform: scale(1.2);
+        }
+
+        .session-group-header {
+            background: #f8fafc;
+            padding: 8px 15px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            border-bottom: 1px solid #edf2f7;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .session-group-header i {
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .order-item {
+                padding: 8px 10px;
+                gap: 8px;
+            }
+
+            .order-name-qty {
+                font-size: 0.85rem;
+            }
+
+            .order-total-price {
+                font-size: 0.85rem;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .loading-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Payment Selector Styles */
+        .payment-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            background: #e9ecef;
+            padding: 5px;
+            border-radius: 16px;
+        }
+
+        .payment-btn {
+            background: transparent;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .payment-btn i {
+            font-size: 1.1rem;
+        }
+
+        .payment-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: scale(1.02);
+        }
+
+        .payment-btn.cash.active {
+            color: var(--success);
+        }
+
+        .payment-btn.online.active {
+            color: #3498db;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 0.6rem;
+            }
+
+            header h1 {
+                font-size: 1.1rem;
+            }
+
+            .container {
+                padding: 0 8px;
+                padding-bottom: 150px;
+            }
+
+            .session-selector {
+                gap: 5px;
+            }
+
+            .session-btn {
+                padding: 10px 4px;
+                font-size: 0.75rem;
+            }
+
+            .payment-btn {
+                padding: 12px 5px;
+                font-size: 0.8rem;
+            }
+
+            .summary-stats {
+                gap: 6px;
+            }
+
+            .stat-box {
+                padding: 8px 4px;
+            }
+
+            .stat-label {
+                font-size: 0.5rem;
+            }
+
+            .stat-value {
+                font-size: 0.85rem;
+            }
+
+            .report-btn {
+                padding: 10px 5px;
+                font-size: 0.75rem;
+            }
+
+            /* Monthly view adjustments */
+            .monthly-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .month-picker-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .section-title {
+                font-size: 1rem;
+                margin: 1.5rem 0 1rem 0;
+            }
+        }
+
+        /* Reports Section Styles */
+        .analytics-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 1.5rem;
+        }
+
+        .report-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.8rem;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .report-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .monthly-card {
+            background: white;
+            padding: 25px;
+            border-radius: 24px;
+            margin-top: 1.5rem;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            position: relative;
+            z-index: 1001;
+        }
+
+        @media (max-width: 600px) {
+            .monthly-card {
+                position: fixed;
+                top: 5%;
+                left: 15px;
+                right: 15px;
+                bottom: auto;
+                max-height: 80vh;
+                margin: 0;
+                overflow-y: auto;
+                z-index: 2001;
+                border: 2px solid var(--accent);
+            }
+
+            .modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                backdrop-filter: blur(5px);
+                z-index: 2000;
+                display: none;
+            }
+        }
+
+        .monthly-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .monthly-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .month-stat {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+            text-align: center;
+        }
+
+        .month-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .month-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .month-picker-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 1rem;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 12px;
+        }
+
+        .month-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+        }
+
+        .modal-overlay {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-content">
+            <h1>Hotel Daily Sales</h1>
+            <p id="current-date-display"></p>
+        </div>
+        <button class="menu-manage-btn" onclick="toggleManagePanel()" title="Manage Menu">
+            <i class="fas fa-edit"></i>
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Manage Items Panel (Hidden by default) -->
+        <section id="manage-panel" class="manage-panel" style="display: none;">
+            <div class="panel-header">
+                <h3><i class="fas fa-plus-circle"></i> Add New Menu Item</h3>
+                <button class="close-btn" onclick="toggleManagePanel()">&times;</button>
+            </div>
+            <form id="add-item-form" class="add-item-form">
+                <div class="form-group">
+                    <label><i class="fas fa-utensils"></i> Item Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-edit"></i>
+                        <input type="text" id="new-item-name" placeholder="e.g. Masala Dosa" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Price (₹)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-indian-rupee-sign"></i>
+                        <input type="number" id="new-item-price" placeholder="60" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-image"></i> Image URL</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-link"></i>
+                        <input type="url" id="new-item-image" placeholder="https://image-link.com">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Session</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar-day"></i>
+                        <select id="new-item-session" required>
+                            <option value="morning">Morning</option>
+                            <option value="afternoon">Afternoon</option>
+                            <option value="night">Night</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="save-btn-container">
+                    <button type="submit" class="save-item-btn">
+                        <i class="fas fa-cloud-upload-alt"></i> Save to Menu
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Session Controls -->
+        <div class="session-selector">
+            <button class="session-btn morning active" onclick="switchSession('morning')">
+                <i class="fas fa-sun"></i>
+                <span>Morning</span>
+            </button>
+            <button class="session-btn afternoon" onclick="switchSession('afternoon')">
+                <i class="fas fa-cloud-sun"></i>
+                <span>Afternoon</span>
+            </button>
+            <button class="session-btn night" onclick="switchSession('night')">
+                <i class="fas fa-moon"></i>
+                <span>Night</span>
+            </button>
+        </div>
+
+        <!-- Payment Method Selector -->
+        <div class="payment-selector">
+            <button class="payment-btn cash active" onclick="switchPayment('cash')" id="btn-pay-cash">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Cash Payment</span>
+            </button>
+            <button class="payment-btn online" onclick="switchPayment('online')" id="btn-pay-online">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Online Payment</span>
+            </button>
+        </div>
+
+        <h2 class="section-title">Session Menu</h2>
+
+        <div id="loading-overlay" class="loading-overlay">
+            <span class="loader"></span>
+            <p style="margin-top: 1rem;">Syncing with Firestore...</p>
+        </div>
+
+        <!-- Items Display -->
+        <div id="items-container" class="items-grid">
+            <!-- Items will be injected here -->
+        </div>
+
+        <!-- Recent Orders -->
+        <h2 class="section-title">Recent Orders (Today)</h2>
+        <div id="orders-list-container" class="orders-list">
+            <!-- Orders will be injected dynamically -->
+            <div class="empty-state" style="padding: 1rem;">
+                <p style="font-size: 0.9rem;">No orders yet today.</p>
+            </div>
+        </div>
+
+        <!-- Today's Summary -->
+        <section class="summary-panel">
+            <div class="summary-header">
+                <h2>Today's Summary</h2>
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="summary-stats">
+                <div class="stat-box" style="grid-column: 1 / -1; background: rgba(255,255,255,0.2);">
+                    <div class="stat-label">Total Sales</div>
+                    <div class="stat-value" id="summary-total-amount">₹0.00</div>
+                </div>
+                <div class="stat-box" style="background: rgba(39, 174, 96, 0.2);">
+                    <div class="stat-label">Cash Total</div>
+                    <div class="stat-value" id="summary-cash-amount">₹0.00</div>
+                </div>
+                <div class="stat-box" style="background: rgba(52, 152, 219, 0.2);">
+                    <div class="stat-label">Online Total</div>
+                    <div class="stat-value" id="summary-online-amount">₹0.00</div>
+                </div>
+                <div class="stat-box" style="grid-column: 1 / -1; opacity: 0.7;">
+                    <div class="stat-label">Items Sold</div>
+                    <div class="stat-value" id="summary-items-count">0</div>
+                </div>
+            </div>
+
+            <!-- Report Actions -->
+            <div class="analytics-actions">
+                <button class="report-btn" onclick="window.generatePDFReport()">
+                    <i class="fas fa-file-pdf"></i> Daily PDF
+                </button>
+                <button class="report-btn" onclick="window.toggleMonthlyView()">
+                    <i class="fas fa-calendar-check"></i> Monthly View
+                </button>
+            </div>
+        </section>
+
+        <!-- Monthly Analysis Panel -->
+        <div id="modal-bg" class="modal-overlay" onclick="window.toggleMonthlyView()"></div>
+        <div id="monthly-view-panel" class="monthly-card">
+            <div class="monthly-header">
+                <h3><i class="fas fa-chart-pie" style="color: var(--accent);"></i> Monthly Sales</h3>
+                <button class="close-btn" onclick="window.toggleMonthlyView()"
+                    style="border:none; background:none; font-size:1.8rem; cursor:pointer; color: #999;">&times;</button>
+            </div>
+
+            <div class="month-picker-container">
+                <input type="month" id="month-picker" class="month-input">
+                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
+                    onclick="window.fetchMonthlyStats()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div id="monthly-results" class="monthly-grid" style="display: none;">
+                <div class="month-stat">
+                    <div class="month-label">Revenue</div>
+                    <div class="month-value" id="m-revenue">₹0</div>
+                </div>
+                <div class="month-stat">
+                    <div class="month-label">Cash</div>
+                    <div class="month-value" id="m-cash" style="color: #27ae60;">₹0</div>
+                </div>
+                <div class="month-stat">
+                    <div class="month-label">Online</div>
+                    <div class="month-value" id="m-online" style="color: #3498db;">₹0</div>
+                </div>
+                <div class="month-stat">
+                    <div class="month-label">Items</div>
+                    <div class="month-value" id="m-count">0</div>
+                </div>
+            </div>
+
+            <div id="month-loader" style="display:none; text-align:center; padding: 30px;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 1.8rem; color: var(--accent);"></i>
+                <p style="margin-top: 10px; font-size: 0.9rem;">Fetching Data...</p>
+            </div>
+
+            <div id="month-no-data" style="display:none; text-align:center; padding: 20px; color: #888;">
+                <p>No data found for this month.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Order saved successfully!</div>
+
+    <!-- Firebase SDKs (CDN Version) -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            getDocs,
+            query,
+            where,
+            orderBy,
+            onSnapshot,
+            setDoc,
+            doc,
+            deleteDoc,
+            updateDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // --- 1. Firebase Configuration ---
+        // REPLACE WITH YOUR OWN CONFIG FROM FIREBASE CONSOLE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCU6pM8XGyBF15O_7Fe7pQSxZWtu4PG8ns",
+            authDomain: "amma-mess.firebaseapp.com",
+            projectId: "amma-mess",
+            storageBucket: "amma-mess.firebasestorage.app",
+            messagingSenderId: "744035726002",
+            appId: "1:744035726002:web:2905c256baed62b2c6cfab"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 2. State & Constants ---
+        let currentSession = 'morning';
+        let currentPaymentMethod = 'cash';
+        let editingItemId = null;
+        const today = new Date().toISOString().split('T')[0];
+
+        // Display today's date
+        document.getElementById('current-date-display').textContent = new Date().toLocaleDateString('en-GB', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        // --- 3. Core Functions ---
+
+        /**
+         * Toggle Menu Management Panel
+         */
+        window.toggleManagePanel = () => {
+            const panel = document.getElementById('manage-panel');
+            const isClosing = panel.style.display !== 'none';
+            panel.style.display = isClosing ? 'none' : 'block';
+
+            if (isClosing) {
+                resetForm();
+            }
+        };
+
+        function resetForm() {
+            editingItemId = null;
+            document.getElementById('add-item-form').reset();
+            const btn = document.querySelector('.save-item-btn');
+            btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Save to Menu';
+            document.querySelector('.panel-header h3').innerHTML = '<i class="fas fa-plus-circle"></i> Add New Menu Item';
+        }
+
+        /**
+         * Handle Add/Edit Item Form
+         */
+        document.getElementById('add-item-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('new-item-name').value;
+            const price = parseFloat(document.getElementById('new-item-price').value);
+            const image = document.getElementById('new-item-image').value || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop';
+            const session = document.getElementById('new-item-session').value;
+            const btn = e.target.querySelector('button');
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                if (editingItemId) {
+                    await updateDoc(doc(db, "items", editingItemId), {
+                        name, price, image, session
+                    });
+                    showToast(`"${name}" updated!`);
+                } else {
+                    await addDoc(collection(db, "items"), {
+                        name, price, image, session
+                    });
+                    showToast(`"${name}" added!`);
+                }
+
+                resetForm();
+                fetchItems(currentSession);
+            } catch (error) {
+                console.error("Error saving item:", error);
+                alert("Error saving item. Check console.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = editingItemId ? '<i class="fas fa-sync"></i> Update Item' : '<i class="fas fa-cloud-upload-alt"></i> Save to Menu';
+            }
+        });
+
+        /**
+         * Fetch items for the active session and render them
+         */
+        async function fetchItems(session) {
+            const container = document.getElementById('items-container');
+            const loader = document.getElementById('loading-overlay');
+
+            container.innerHTML = '';
+            loader.style.display = 'flex';
+
+            try {
+                const q = query(collection(db, "items"), where("session", "==", session));
+                const querySnapshot = await getDocs(q);
+
+                loader.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <i class="fas fa-utensils"></i>
+                            <p>No items found for ${session} session.</p>
+                            <button onclick="window.seedDatabase()" style="margin-top: 1rem; border: none; background: #34495e; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                                Add Demo Items
+                            </button>
+                        </div>`;
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const item = doc.data();
+                    renderItemCard(item, doc.id);
+                });
+            } catch (error) {
+                console.error("Error fetching items: ", error);
+                container.innerHTML = `<p style="color: red; text-align: center;">Error connecting to Firestore. Please check your config.</p>`;
+            }
+        }
+
+        /**
+         * Create and append an item card to the UI
+         */
+        function renderItemCard(item, id) {
+            const container = document.getElementById('items-container');
+            const card = document.createElement('div');
+            card.className = 'item-card';
+
+            const imageUrl = item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop';
+
+            card.innerHTML = `
+                <div class="item-actions">
+                    <button class="action-btn edit-btn" onclick="window.editItem('${id}', '${item.name}', ${item.price}, '${item.session}', '${item.image || ''}')">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="window.deleteItem('${id}', '${item.name}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <img src="${imageUrl}" alt="${item.name}" class="item-image" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
+                <div class="item-details">
+                    <div class="item-info">
+                        <h3>${item.name}</h3>
+                        <div class="price">₹${item.price}</div>
+                    </div>
+                    <div class="item-controls">
+                        <input type="number" class="qty-input" value="1" min="1" id="qty-${item.name.replace(/\s+/g, '-')}" onfocus="this.select()">
+                        <button class="add-btn" onclick="window.processOrder('${item.name}', ${item.price})">
+                            <i class="fas fa-plus"></i> ADD
+                        </button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        }
+
+        window.deleteItem = async (id, name) => {
+            if (confirm(`Are you sure you want to delete "${name}"?`)) {
+                try {
+                    await deleteDoc(doc(db, "items", id));
+                    showToast(`"${name}" deleted.`);
+                    fetchItems(currentSession);
+                } catch (error) {
+                    console.error("Error deleting item:", error);
+                    alert("Delete failed.");
+                }
+            }
+        };
+
+        window.editItem = (id, name, price, session, image) => {
+            editingItemId = id;
+            document.getElementById('new-item-name').value = name;
+            document.getElementById('new-item-price').value = price;
+            document.getElementById('new-item-session').value = session;
+            document.getElementById('new-item-image').value = image;
+
+            // Show panel and focus
+            document.getElementById('manage-panel').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Update UI
+            document.querySelector('.save-item-btn').innerHTML = '<i class="fas fa-sync"></i> Update Item';
+            document.querySelector('.panel-header h3').innerHTML = `<i class="fas fa-edit"></i> Editing: ${name}`;
+        };
+
+        /**
+         * Process and save order
+         */
+        window.processOrder = async (name, price) => {
+            const qtyInput = document.getElementById(`qty-${name.replace(/\s+/g, '-')}`);
+            const quantity = parseInt(qtyInput.value) || 0;
+
+            if (quantity <= 0) return;
+
+            const total = price * quantity;
+
+            try {
+                // Disable button during saving
+                const btn = qtyInput.nextElementSibling;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                await addDoc(collection(db, "orders"), {
+                    name: name,
+                    price: price,
+                    quantity: quantity,
+                    total: total,
+                    session: currentSession,
+                    paymentMethod: currentPaymentMethod,
+                    date: today,
+                    timestamp: new Date() // Use local date for immediate UI ordering if index is missing
+                });
+
+                showToast(`Added ${quantity}x ${name}`);
+                qtyInput.value = 1; // Reset qty
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-plus"></i> ADD';
+            } catch (error) {
+                console.error("Error adding order: ", error);
+                alert("Failed to save order. Check console for details.");
+            }
+        };
+
+        /**
+         * Update Summary Real-time
+         */
+        function startSummaryListener() {
+            const q = query(
+                collection(db, "orders"),
+                where("date", "==", today)
+            );
+            const ordersListContainer = document.getElementById('orders-list-container');
+
+            onSnapshot(q, (snapshot) => {
+                let totalAmount = 0;
+                let cashAmount = 0;
+                let onlineAmount = 0;
+                let totalItems = 0;
+
+                ordersListContainer.innerHTML = '';
+
+                if (snapshot.empty) {
+                    ordersListContainer.innerHTML = '<div class="empty-state" style="padding: 1rem;"><p style="font-size: 0.9rem;">No orders yet today.</p></div>';
+                }
+
+                // Manual sorting in memory to avoid Firebase Index requirement
+                const docs = [];
+                snapshot.forEach(d => docs.push({ id: d.id, ...d.data() }));
+                docs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0) || b.timestamp - a.timestamp);
+
+                let currentIndex = 1;
+                let lastSession = '';
+
+                docs.forEach((order) => {
+                    const orderId = order.id;
+                    const amount = (order.total || 0);
+
+                    totalAmount += amount;
+                    totalItems += (order.quantity || 0);
+
+                    if (order.paymentMethod === 'online') {
+                        onlineAmount += amount;
+                    } else {
+                        cashAmount += amount;
+                    }
+
+                    // Add Session Header "Break"
+                    if (order.session !== lastSession) {
+                        const header = document.createElement('div');
+                        header.className = 'session-group-header';
+                        const icon = order.session === 'morning' ? 'fa-sun' : (order.session === 'afternoon' ? 'fa-cloud-sun' : 'fa-moon');
+                        header.innerHTML = `<i class="fas ${icon}"></i> ${order.session} Sales`;
+                        ordersListContainer.appendChild(header);
+                        lastSession = order.session;
+                    }
+
+                    // Format time if timestamp exists
+                    let timeStr = "";
+                    if (order.timestamp) {
+                        try {
+                            const date = order.timestamp.toDate ? order.timestamp.toDate() : new Date(order.timestamp);
+                            timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        } catch (e) { /* timestamp might be null briefly while saving */ }
+                    }
+
+                    // Render order item in line-wise mode
+                    const orderItem = document.createElement('div');
+                    orderItem.className = 'order-item';
+                    orderItem.innerHTML = `
+                        <div class="order-num">#${docs.length - (currentIndex - 1)}</div>
+                        <div class="payment-status-dot dot-${order.paymentMethod || 'cash'}" title="${order.paymentMethod}"></div>
+                        <div class="order-details-row">
+                            <div class="order-main-info">
+                                <span class="order-name-qty" style="font-size: 0.8rem;">${order.name} (${order.quantity})</span>
+                                ${timeStr ? `<span class="order-time-tag" style="font-size: 0.65rem;">${timeStr}</span>` : ''}
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span class="order-total-price" style="font-size: 0.8rem;">₹${amount}</span>
+                                <button class="delete-order-btn" onclick="window.deleteOrder('${orderId}', '${order.name}')" style="font-size: 0.8rem;">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    ordersListContainer.appendChild(orderItem);
+                    currentIndex++;
+                });
+
+                document.getElementById('summary-total-amount').textContent = `₹${totalAmount.toLocaleString('en-IN')}`;
+                document.getElementById('summary-cash-amount').textContent = `₹${cashAmount.toLocaleString('en-IN')}`;
+                document.getElementById('summary-online-amount').textContent = `₹${onlineAmount.toLocaleString('en-IN')}`;
+                document.getElementById('summary-items-count').textContent = totalItems;
+
+                // Store today's data globally for PDF generation
+                window.todayOrders = docs;
+            });
+        }
+
+        /**
+         * PDF Report Generation using jsPDF
+         */
+        window.generatePDFReport = () => {
+            if (!window.todayOrders || window.todayOrders.length === 0) {
+                alert("No orders to export for today.");
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Header
+            doc.setFontSize(22);
+            doc.setTextColor(44, 62, 80);
+            doc.text("Hotel Daily Sales Report", 14, 20);
+
+            doc.setFontSize(12);
+            doc.setTextColor(127, 140, 141);
+            doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, 14, 30);
+
+            const sessions = ['morning', 'afternoon', 'night'];
+            let currentY = 40;
+
+            sessions.forEach(session => {
+                const sessionOrders = window.todayOrders.filter(o => (o.session || 'morning') === session);
+
+                if (sessionOrders.length > 0) {
+                    // Session Header
+                    doc.setFontSize(16);
+                    doc.setTextColor(230, 126, 34);
+                    doc.text(`${session.charAt(0).toUpperCase() + session.slice(1)} Sales`, 14, currentY);
+                    currentY += 5;
+
+                    const tableData = sessionOrders.map((o, i) => [
+                        i + 1,
+                        o.name,
+                        o.quantity,
+                        `Rs. ${o.price}`,
+                        `Rs. ${o.total}`,
+                        o.paymentMethod?.toUpperCase() || 'CASH'
+                    ]);
+
+                    doc.autoTable({
+                        startY: currentY,
+                        head: [['#', 'Item Name', 'Qty', 'Price', 'Total', 'Payment']],
+                        body: tableData,
+                        theme: 'striped',
+                        headStyles: { fillColor: [44, 62, 80] },
+                    });
+
+                    currentY = doc.lastAutoTable.finalY + 15;
+
+                    if (currentY > 260) {
+                        doc.addPage();
+                        currentY = 20;
+                    }
+                }
+            });
+
+            // Footer Summary
+            doc.setFontSize(14);
+            doc.setTextColor(44, 62, 80);
+            const totalText = document.getElementById('summary-total-amount').textContent.replace('₹', 'Rs. ');
+            const cashText = document.getElementById('summary-cash-amount').textContent.replace('₹', 'Rs. ');
+            const onlineText = document.getElementById('summary-online-amount').textContent.replace('₹', 'Rs. ');
+
+            doc.text(`Total Sales: ${totalText}`, 14, currentY);
+            doc.text(`Cash Total: ${cashText}`, 14, currentY + 8);
+            doc.text(`Online Total: ${onlineText}`, 14, currentY + 16);
+
+            // Save
+            doc.save(`Hotel_Report_${today}.pdf`);
+            showToast("PDF Downloaded with Session Breaks!");
+        };
+
+        /**
+         * Monthly Stats Logic
+         */
+        window.toggleMonthlyView = () => {
+            const panel = document.getElementById('monthly-view-panel');
+            const bg = document.getElementById('modal-bg');
+            const isShowing = panel.style.display === 'block';
+
+            if (isShowing) {
+                panel.style.display = 'none';
+                if (bg) bg.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                if (bg) bg.style.display = 'block';
+
+                // Pre-fill and auto-fetch
+                const now = new Date();
+                const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                document.getElementById('month-picker').value = monthStr;
+                window.fetchMonthlyStats();
+            }
+        };
+
+        window.fetchMonthlyStats = async () => {
+            const monthInput = document.getElementById('month-picker').value;
+            if (!monthInput) return;
+
+            const loader = document.getElementById('month-loader');
+            const results = document.getElementById('monthly-results');
+            const noData = document.getElementById('month-no-data');
+
+            // Show loading
+            loader.style.display = 'block';
+            results.style.display = 'none';
+            if (noData) noData.style.display = 'none';
+
+            try {
+                // Fetch all today's orders or all orders if needed (filtering in JS for stability)
+                const q = query(collection(db, "orders"));
+                const querySnapshot = await getDocs(q);
+
+                let rev = 0, csh = 0, onl = 0, cnt = 0;
+
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    if (data.date && data.date.startsWith(monthInput)) {
+                        rev += (data.total || 0);
+                        cnt += (data.quantity || 0);
+                        if (data.paymentMethod === 'online') onl += (data.total || 0);
+                        else csh += (data.total || 0);
+                    }
+                });
+
+                loader.style.display = 'none';
+
+                if (rev === 0) {
+                    if (noData) noData.style.display = 'block';
+                } else {
+                    document.getElementById('m-revenue').textContent = `₹${rev.toLocaleString('en-IN')}`;
+                    document.getElementById('m-cash').textContent = `₹${csh.toLocaleString('en-IN')}`;
+                    document.getElementById('m-online').textContent = `₹${onl.toLocaleString('en-IN')}`;
+                    document.getElementById('m-count').textContent = cnt;
+                    results.style.display = 'grid';
+                }
+            } catch (err) {
+                console.error("Monthly Fetch Error:", err);
+                loader.style.display = 'none';
+                alert("Data sync error. Please try again.");
+            }
+        };
+
+        /**
+         * Delete an order
+         */
+        window.deleteOrder = async (id, name) => {
+            if (confirm(`Remove the order for "${name}"?`)) {
+                try {
+                    await deleteDoc(doc(db, "orders", id));
+                    showToast(`Order for "${name}" removed.`);
+                } catch (error) {
+                    console.error("Error deleting order:", error);
+                    alert("Failed to remove order.");
+                }
+            }
+        };
+
+        /**
+         * Switch Payment Method
+         */
+        window.switchPayment = (method) => {
+            currentPaymentMethod = method;
+            document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
+            if (method === 'cash') {
+                document.getElementById('btn-pay-cash').classList.add('active');
+            } else {
+                document.getElementById('btn-pay-online').classList.add('active');
+            }
+        };
+
+        /**
+         * Switch between sessions
+         */
+        window.switchSession = (session) => {
+            currentSession = session;
+
+            // Update UI buttons
+            document.querySelectorAll('.session-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.classList.contains(session)) btn.classList.add('active');
+            });
+
+            fetchItems(session);
+        };
+
+        /**
+         * Helper for Toast
+         */
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        /**
+         * Seed Database with initial items (Demo)
+         */
+        window.seedDatabase = async () => {
+            const items = [
+                { name: "Masala Dosa", price: 60, session: "morning", image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=500&auto=format&fit=crop" },
+                { name: "Idli (2pcs)", price: 40, session: "morning", image: "https://images.unsplash.com/photo-1589301773839-9d7a9616d6ae?w=500&auto=format&fit=crop" },
+                { name: "Coffee/Tea", price: 20, session: "morning", image: "https://images.unsplash.com/photo-1544787210-2211d40fd812?w=500&auto=format&fit=crop" },
+                { name: "Veg Meals", price: 120, session: "afternoon", image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=500&auto=format&fit=crop" },
+                { name: "Chicken Biryani", price: 220, session: "afternoon", image: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=500&auto=format&fit=crop" },
+                { name: "Curd Rice", price: 80, session: "afternoon", image: "https://images.unsplash.com/photo-1626777551341-10492ec663d8?w=500&auto=format&fit=crop" },
+                { name: "Roti with Curry", price: 100, session: "night", image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=500&auto=format&fit=crop" },
+                { name: "Fried Rice", price: 150, session: "night", image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=500&auto=format&fit=crop" },
+                { name: "Fruit Salad", price: 90, session: "night", image: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=500&auto=format&fit=crop" }
+            ];
+
+            if (confirm("This will add demo items to your 'items' collection. Continue?")) {
+                try {
+                    for (const item of items) {
+                        await addDoc(collection(db, "items"), item);
+                    }
+                    alert("Demo items added successfully!");
+                    fetchItems(currentSession);
+                } catch (e) {
+                    alert("Error seeding: " + e.message);
+                }
+            }
+        };
+
+        // Initialize App
+        fetchItems(currentSession);
+        startSummaryListener();
+
+    </script>
+</body>
+
+</html>
