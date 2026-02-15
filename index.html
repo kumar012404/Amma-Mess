@@ -298,6 +298,27 @@
             margin-bottom: 2rem;
         }
 
+        .close-btn {
+            background: #f8f9fa;
+            border: none;
+            color: var(--text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #fee;
+            color: #e74c3c;
+            transform: rotate(90deg);
+        }
+
         .panel-header h3 {
             font-size: 1.5rem;
             font-weight: 700;
@@ -1829,9 +1850,7 @@
             <p id="current-date-display"></p>
         </div>
         <div class="header-actions">
-            <button class="header-btn popular" onclick="window.togglePopularView()" title="Popular Today">
-                <i class="fas fa-fire"></i>
-            </button>
+
             <button class="header-btn manage" onclick="window.toggleManagePanel()" title="Manage Menu">
                 <i class="fas fa-edit"></i>
             </button>
@@ -1843,7 +1862,9 @@
         <section id="manage-panel" class="manage-panel" style="display: none;">
             <div class="panel-header">
                 <h3><i class="fas fa-plus-circle"></i> Add New Menu Item</h3>
-                <button class="close-btn" onclick="toggleManagePanel()">&times;</button>
+                <button class="close-btn" onclick="toggleManagePanel()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <form id="add-item-form" class="add-item-form">
                 <div class="form-group">
@@ -2094,8 +2115,9 @@
         <div id="sidebar" class="sidebar">
             <div class="sidebar-header">
                 <h2>Amma Mess</h2>
-                <button onclick="window.toggleSidebar()"
-                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+                <button onclick="window.toggleSidebar()" class="close-btn" style="background:none; color:white;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <nav class="sidebar-nav">
                 <button class="nav-item" onclick="window.toggleSidebar()">
@@ -2131,8 +2153,9 @@
                 <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
                     <i class="fas fa-fire" style="color: #e67e22;"></i> Most Popular Today
                 </h3>
-                <button onclick="window.togglePopularView()"
-                    style="background:none; border:none; color:#ccc; font-size:1.8rem; cursor:pointer;">&times;</button>
+                <button onclick="window.togglePopularView()" class="close-btn" style="background:none; color:#ccc;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div id="top-selling-items-container">
                 <!-- Data injected here -->
@@ -2152,8 +2175,9 @@
             <h3 style="margin:0; display:flex; align-items:center; gap:10px; color: var(--primary);">
                 <i class="fas fa-history" style="color: var(--accent);"></i> Detailed History
             </h3>
-            <button onclick="window.toggleHistoryView()"
-                style="background:none; border:none; color:#999; font-size:1.8rem; cursor:pointer;">&times;</button>
+            <button onclick="window.toggleHistoryView()" class="close-btn" style="background:none; color:#999;">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         <div class="history-scroll-area" id="detailed-history-container">
             <!-- Detailed Bills Injected Here -->
