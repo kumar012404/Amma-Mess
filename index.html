@@ -651,6 +651,53 @@
             background: #219150;
         }
 
+        /* Popular Badge Styles */
+        .popular-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, #e67e22, #f1c40f);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse-popular 2s infinite;
+        }
+
+        @keyframes pulse-popular {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 4px 10px rgba(230, 126, 34, 0.2);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 4px 15px rgba(230, 126, 34, 0.5);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 4px 10px rgba(230, 126, 34, 0.2);
+            }
+        }
+
+        .popular-badge i {
+            font-size: 0.8rem;
+            color: #fff;
+        }
+
+        .item-card.is-popular {
+            border: 2px solid rgba(230, 126, 34, 0.3);
+        }
+
         .add-btn:disabled {
             background: #bdc3c7;
             cursor: not-allowed;
@@ -2264,6 +2311,7 @@
         let currentPaymentMethod = 'cash';
         let editingItemId = null;
         let cart = []; // New: Temporary Cart
+        window.currentItemStats = {}; // Global track for popular items
         const today = new Date().toISOString().split('T')[0];
 
         // Display today's date
@@ -2396,8 +2444,8 @@
             const container = document.getElementById('items-container');
             const loader = document.getElementById('loading-overlay');
 
-            container.innerHTML = '';
-            loader.style.display = 'flex';
+            // Don't clear immediately to avoid flicker if we're just updating stats
+            if (!container.innerHTML) loader.style.display = 'flex';
 
             try {
                 const q = query(collection(db, "items"), where("session", "==", session));
@@ -2417,9 +2465,25 @@
                     return;
                 }
 
+                const itemsList = [];
                 querySnapshot.forEach((doc) => {
-                    const item = doc.data();
-                    renderItemCard(item, doc.id);
+                    itemsList.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by popularity (order count)
+                itemsList.sort((a, b) => {
+                    const countA = window.currentItemStats[a.name] || 0;
+                    const countB = window.currentItemStats[b.name] || 0;
+                    return countB - countA; // DESC order
+                });
+
+                // Get max count for badges
+                const maxCount = Math.max(...Object.values(window.currentItemStats), 0);
+
+                container.innerHTML = '';
+                itemsList.forEach((item) => {
+                    const isPopular = maxCount > 0 && (window.currentItemStats[item.name] || 0) >= (maxCount * 0.7) && (window.currentItemStats[item.name] > 0);
+                    renderItemCard(item, item.id, isPopular);
                 });
             } catch (error) {
                 console.error("Error fetching items: ", error);
@@ -2430,15 +2494,16 @@
         /**
          * Create and append an item card to the UI
          */
-        function renderItemCard(item, id) {
+        function renderItemCard(item, id, isPopular = false) {
             const container = document.getElementById('items-container');
             const card = document.createElement('div');
-            card.className = 'item-card';
+            card.className = `item-card ${isPopular ? 'is-popular' : ''}`;
 
             const imageUrl = item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop';
+            const popularBadge = isPopular ? `<div class="popular-badge"><i class="fas fa-fire"></i> Best Seller</div>` : '';
 
             card.innerHTML = `
-
+                ${popularBadge}
                 <img src="${imageUrl}" alt="${item.name}" class="item-image" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
                 <div class="item-details">
                     <div class="item-info">
@@ -2840,6 +2905,12 @@
                         });
                     }
                 }
+
+                // Store global item stats for menu sorting
+                window.currentItemStats = itemStats;
+
+                // Refresh menu to apply sorting and popular badges
+                fetchItems(currentSession);
 
                 // Store today's data globally for PDF generation
                 window.todayOrders = docs;
