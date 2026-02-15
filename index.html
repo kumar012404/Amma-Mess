@@ -272,6 +272,25 @@
             position: relative;
         }
 
+        .manage-item-row {
+            transition: all 0.3s ease;
+        }
+
+        .manage-item-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border-color: var(--accent) !important;
+        }
+
+        .manage-item-row button {
+            transition: all 0.2s ease;
+        }
+
+        .manage-item-row button:hover {
+            transform: scale(1.1);
+            opacity: 0.9;
+        }
+
         .panel-header {
             display: flex;
             justify-content: space-between;
@@ -450,6 +469,34 @@
             flex: 1;
             height: 1px;
             background: #ddd;
+        }
+
+        .toggle-view-btn {
+            background: rgba(44, 62, 80, 0.05);
+            border: 1px solid rgba(44, 62, 80, 0.1);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--primary);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .toggle-view-btn.active {
+            background: var(--accent);
+            color: white !important;
+            border-color: var(--accent);
+        }
+
+        .toggle-view-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: scale(1.1);
         }
 
         /* Overall Items Styling */
@@ -797,6 +844,12 @@
                 gap: 3px;
             }
 
+            .toggle-view-btn {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8rem;
+            }
+
             /* Reuse monthly card style for generic modals */
             .modal-card {
                 position: fixed;
@@ -820,11 +873,16 @@
             }
 
             #popular-items-panel .top-selling-title {
-                color: white;
+                color: white !important;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 padding-bottom: 15px;
                 margin-bottom: 20px;
                 font-size: 1.2rem;
+            }
+
+            #popular-items-panel .top-item-info,
+            #popular-items-panel .top-item-info span {
+                color: white !important;
             }
 
             @keyframes modalIn {
@@ -1475,6 +1533,288 @@
         .modal-overlay {
             display: none;
         }
+
+        /* Desktop/Laptop Enhancements (1024px and above) */
+        @media (min-width: 1024px) {
+
+            /* Container expansion for better use of screen space */
+            .container {
+                max-width: 1100px;
+                transition: max-width 0.3s ease;
+            }
+
+            .items-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            /* Premium Modal Styling for Desktop */
+            .modal-card {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                max-width: 600px !important;
+                padding: 35px !important;
+                border-radius: 28px !important;
+                box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5) !important;
+                max-height: 85vh;
+                overflow-y: auto;
+                z-index: 3000 !important;
+                display: none;
+                /* Hidden by default on PC */
+            }
+
+            /* Smooth fade-in animation for desktop */
+            @keyframes desktopModalIn {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -48%) scale(0.95);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+
+            .modal-card {
+                animation: desktopModalIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+
+            /* Popular Items Panel - Desktop Specific */
+            #popular-items-panel {
+                max-width: 650px !important;
+                padding: 40px !important;
+            }
+
+            #popular-items-panel h3 {
+                font-size: 1.8rem !important;
+                color: white !important;
+            }
+
+            #popular-items-panel .top-item-row {
+                margin-bottom: 25px;
+            }
+
+            #popular-items-panel .top-item-info {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+                color: white !important;
+            }
+
+            #popular-items-panel .top-item-info span {
+                color: white !important;
+            }
+
+            #popular-items-panel .top-item-bar-bg {
+                height: 14px;
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            #popular-items-panel .top-item-bar-fill {
+                box-shadow: 0 0 15px rgba(230, 126, 34, 0.4);
+            }
+
+            /* History Panel - Desktop Specific */
+            #history-items-panel {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                max-width: 750px !important;
+                width: 90% !important;
+                padding: 35px !important;
+                background: white;
+                border-radius: 28px;
+                box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+                z-index: 3000 !important;
+                max-height: 85vh;
+                overflow: hidden;
+                display: none;
+                /* Start hidden */
+                flex-direction: column;
+            }
+
+            #history-items-panel .modal-header {
+                margin-bottom: 25px;
+                padding-bottom: 20px;
+                border-bottom: 2px solid #f0f3f6;
+            }
+
+            #history-items-panel .modal-header h3 {
+                font-size: 1.8rem;
+                color: var(--primary);
+            }
+
+            .history-scroll-area {
+                overflow-y: auto;
+                max-height: calc(85vh - 150px);
+                padding-right: 10px;
+            }
+
+            /* Custom scrollbar for history */
+            .history-scroll-area::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .history-scroll-area::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            .history-scroll-area::-webkit-scrollbar-thumb {
+                background: var(--accent);
+                border-radius: 10px;
+            }
+
+            .history-scroll-area::-webkit-scrollbar-thumb:hover {
+                background: #d35400;
+            }
+
+            /* Monthly View Panel - Desktop Specific */
+            #monthly-view-panel,
+            .monthly-card {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                max-width: 650px !important;
+                padding: 35px !important;
+                background: white;
+                border-radius: 28px;
+                box-shadow: 0 40px 100px rgba(0, 0, 0, 0.5);
+                z-index: 3000 !important;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .monthly-header h3 {
+                font-size: 1.6rem;
+                color: var(--primary);
+            }
+
+            .month-picker-container {
+                gap: 12px;
+            }
+
+            .month-input {
+                font-size: 1rem;
+                padding: 12px 16px;
+            }
+
+            .monthly-grid {
+                gap: 20px;
+            }
+
+            .month-stat {
+                padding: 20px;
+                border-radius: 16px;
+            }
+
+            .month-label {
+                font-size: 0.95rem;
+                margin-bottom: 8px;
+            }
+
+            .month-value {
+                font-size: 1.8rem;
+            }
+
+            /* Blurred Overlay for Desktop */
+            .modal-overlay {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: rgba(0, 0, 0, 0.7) !important;
+                backdrop-filter: blur(10px) !important;
+                -webkit-backdrop-filter: blur(10px) !important;
+                z-index: 2900 !important;
+                animation: fadeInOverlay 0.3s ease !important;
+                display: none;
+                /* Hidden on load */
+            }
+
+            @keyframes fadeInOverlay {
+                from {
+                    opacity: 0;
+                }
+
+                to {
+                    opacity: 1;
+                }
+            }
+
+            /* Enhanced Bill Cards for Desktop */
+            .detailed-bill-card {
+                background: white;
+                border: 2px solid #f0f3f6;
+                border-radius: 20px;
+                padding: 24px;
+                margin-bottom: 20px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+                transition: all 0.3s ease;
+            }
+
+            .detailed-bill-card:hover {
+                border-color: var(--accent);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
+
+            .bill-header {
+                margin-bottom: 18px;
+                padding-bottom: 15px;
+                border-bottom: 2px dashed #e9ecef;
+            }
+
+            .bill-id {
+                font-size: 1.2rem;
+                font-weight: 800;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .bill-time {
+                font-size: 0.85rem;
+                background: #f8f9fa;
+                padding: 6px 14px;
+                border-radius: 20px;
+            }
+
+            .bill-items-list {
+                font-size: 1rem;
+                line-height: 1.8;
+                margin: 18px 0;
+            }
+
+            .bill-item-row {
+                padding: 6px 0;
+            }
+
+            .bill-footer {
+                margin-top: 18px;
+                padding-top: 18px;
+                border-top: 2px solid #f0f3f6;
+                font-size: 1.2rem;
+            }
+
+            /* Summary Panel Desktop Enhancements */
+            .summary-panel {
+                border-radius: 24px;
+                padding: 2.5rem;
+            }
+
+            .stat-box {
+                padding: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 
@@ -1544,6 +1884,20 @@
                     </button>
                 </div>
             </form>
+
+            <div class="manage-list-section"
+                style="margin-top: 3rem; border-top: 2px dashed #f0f2f5; padding-top: 2rem;">
+                <h4 style="font-size: 1.2rem; color: var(--primary); margin-bottom: 1.5rem;">
+                    <i class="fas fa-list" style="color: var(--accent);"></i> Existing Menu Items
+                </h4>
+                <div id="manage-items-list" class="manage-items-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                    <!-- Managed items will be injected here -->
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted); grid-column: 1/-1;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading existing items...
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- Session Controls -->
@@ -1577,8 +1931,13 @@
         </div>
 
         <!-- Recent Orders -->
-        <h2 class="section-title">Recent Orders (Today)</h2>
-        <div id="orders-list-container" class="orders-list">
+        <h2 class="section-title">
+            Recent Orders (Today)
+            <button class="toggle-view-btn" onclick="window.toggleRecentOrders(this)" title="Toggle Recent Orders">
+                <i class="fas fa-eye-slash"></i>
+            </button>
+        </h2>
+        <div id="orders-list-container" class="orders-list" style="display: none;">
             <!-- Orders will be injected dynamically -->
             <div class="empty-state" style="padding: 1rem;">
                 <p style="font-size: 0.9rem;">No orders yet today.</p>
@@ -1666,7 +2025,6 @@
                     <div class="stat-value" id="summary-items-count">0</div>
                 </div>
             </div>
-
 
 
         </section>
@@ -1867,8 +2225,64 @@
 
             if (isClosing) {
                 resetForm();
+            } else {
+                loadManageItemsList();
             }
         };
+
+        async function loadManageItemsList() {
+            const listContainer = document.getElementById('manage-items-list');
+            if (!listContainer) return;
+
+            listContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted); grid-column: 1/-1;"><i class="fas fa-spinner fa-spin"></i> Loading...</div>';
+
+            try {
+                const q = query(collection(db, "items"), orderBy("name"));
+                const querySnapshot = await getDocs(q);
+                listContainer.innerHTML = '';
+
+                if (querySnapshot.empty) {
+                    listContainer.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">No items in menu yet.</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((docSnap) => {
+                    const item = docSnap.data();
+                    const id = docSnap.id;
+                    const row = document.createElement('div');
+                    row.className = 'manage-item-row';
+                    row.style.background = '#f8fafc';
+                    row.style.padding = '12px';
+                    row.style.borderRadius = '12px';
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.gap = '12px';
+                    row.style.border = '1px solid #edf2f7';
+
+                    row.innerHTML = `
+                        <img src="${item.image || ''}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover; background: #eee;" onerror="this.src='https://via.placeholder.com/50'">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 700; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">${item.session.toUpperCase()} • ₹${item.price}</div>
+                        </div>
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="window.editItem('${id}', '${item.name.replace(/'/g, "\\'")}', ${item.price}, '${item.session}', '${item.image || ''}')" 
+                                    style="border: none; background: #3498db; color: white; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-pencil-alt" style="font-size: 0.8rem;"></i>
+                            </button>
+                            <button onclick="window.deleteItem('${id}', '${item.name.replace(/'/g, "\\'")}')" 
+                                    style="border: none; background: #e74c3c; color: white; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-trash" style="font-size: 0.8rem;"></i>
+                            </button>
+                        </div>
+                    `;
+                    listContainer.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Error loading manage list:", error);
+                listContainer.innerHTML = '<p style="color: red; grid-column: 1/-1;">Error loading items.</p>';
+            }
+        }
 
         function resetForm() {
             editingItemId = null;
@@ -1907,6 +2321,7 @@
 
                 resetForm();
                 fetchItems(currentSession);
+                loadManageItemsList();
             } catch (error) {
                 console.error("Error saving item:", error);
                 alert("Error saving item. Check console.");
@@ -1965,14 +2380,7 @@
             const imageUrl = item.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500&auto=format&fit=crop';
 
             card.innerHTML = `
-                <div class="item-actions">
-                    <button class="action-btn edit-btn" onclick="window.editItem('${id}', '${item.name}', ${item.price}, '${item.session}', '${item.image || ''}')">
-                        <i class="fas fa-pencil-alt"></i>
-                    </button>
-                    <button class="action-btn delete-btn" onclick="window.deleteItem('${id}', '${item.name}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+
                 <img src="${imageUrl}" alt="${item.name}" class="item-image" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
                 <div class="item-details">
                     <div class="item-info">
@@ -2016,6 +2424,7 @@
                     await deleteDoc(doc(db, "items", id));
                     showToast(`"${name}" deleted.`);
                     fetchItems(currentSession);
+                    loadManageItemsList();
                 } catch (error) {
                     console.error("Error deleting item:", error);
                     alert("Delete failed.");
@@ -2472,17 +2881,43 @@
             const bg = document.getElementById('popular-modal-bg');
             const isShowing = panel.style.display === 'block';
 
-            panel.style.display = isShowing ? 'none' : 'block';
-            bg.style.display = isShowing ? 'none' : 'block';
+            if (isShowing) {
+                panel.style.display = 'none';
+                bg.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                bg.style.display = 'block';
+            }
+        };
+
+        window.toggleRecentOrders = (btn) => {
+            const container = document.getElementById('orders-list-container');
+            const icon = btn.querySelector('i');
+            const isHidden = container.style.display === 'none';
+
+            if (isHidden) {
+                container.style.display = 'block';
+                icon.className = 'fas fa-eye';
+                btn.classList.add('active');
+            } else {
+                container.style.display = 'none';
+                icon.className = 'fas fa-eye-slash';
+                btn.classList.remove('active');
+            }
         };
 
         window.toggleHistoryView = () => {
             const panel = document.getElementById('history-items-panel');
             const bg = document.getElementById('history-modal-bg');
-            const isShowing = panel.style.display === 'flex';
+            const isShowing = panel.style.display === 'block';
 
-            panel.style.display = isShowing ? 'none' : 'flex';
-            bg.style.display = isShowing ? 'none' : 'block';
+            if (isShowing) {
+                panel.style.display = 'none';
+                bg.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+                bg.style.display = 'block';
+            }
         };
 
         window.toggleSidebar = () => {
