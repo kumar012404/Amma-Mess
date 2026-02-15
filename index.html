@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Daily Sales Tracker</title>
+    <title>Amma Mess Tracker</title>
+    <link rel="icon" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f35b.png" type="image/png">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
@@ -91,9 +92,126 @@
             font-size: 0.9rem;
         }
 
-        .menu-manage-btn {
+        /* Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--primary);
+            color: white;
+            z-index: 2500;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 2rem 1.5rem;
+            box-shadow: 20px 0 50px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2400;
+            display: none;
+        }
+
+        .menu-toggle {
+            position: absolute;
+            left: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .menu-toggle {
+                left: 10px;
+                font-size: 1.2rem;
+            }
+        }
+
+        .header-actions {
             position: absolute;
             right: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .header-btn {
             background: rgba(255, 255, 255, 0.2);
             border: none;
             color: white;
@@ -106,11 +224,40 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
+            position: relative;
         }
 
-        .menu-manage-btn:hover {
+        .header-btn i {
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
             background: var(--accent);
+        }
+
+        .header-btn:hover i {
+            transform: scale(1.15);
+        }
+
+        .header-btn.popular:hover {
+            background: #e74c3c;
+        }
+
+        .header-btn.manage:hover {
             transform: rotate(90deg);
+        }
+
+        @media (max-width: 600px) {
+            .header-actions {
+                right: 10px;
+                gap: 8px;
+            }
+
+            .header-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 1rem;
+            }
         }
 
         /* Manage Panel Refinement */
@@ -441,6 +588,57 @@
             cursor: not-allowed;
         }
 
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .qty-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--primary);
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .qty-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .qty-input {
+            width: 30px;
+            background: transparent;
+            border: none;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--primary);
+            -moz-appearance: textfield;
+            outline: none;
+        }
+
+        .qty-input::-webkit-outer-spin-button,
+        .qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
         /* Summary Section */
         .summary-panel {
             margin-top: 3rem;
@@ -449,6 +647,65 @@
             padding: 2rem;
             border-radius: 20px;
             box-shadow: 0 15px 35px rgba(44, 62, 80, 0.2);
+        }
+
+        .top-selling-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .top-selling-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+        }
+
+        .top-item-row {
+            margin-bottom: 12px;
+        }
+
+        .top-item-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .top-item-bar-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .top-item-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #f39c12);
+            border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @media (max-width: 768px) {
+            .top-selling-section {
+                margin-top: 15px;
+                padding-top: 10px;
+            }
+
+            .top-item-row {
+                margin-bottom: 8px;
+            }
+
+            .top-item-info {
+                font-size: 0.75rem;
+            }
         }
 
         .summary-header {
@@ -491,7 +748,8 @@
             }
 
             .items-grid {
-                gap: 6px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
             }
 
             .item-image {
@@ -537,6 +795,182 @@
                 top: 4px;
                 right: 4px;
                 gap: 3px;
+            }
+
+            /* Reuse monthly card style for generic modals */
+            .modal-card {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 25px;
+                border-radius: 24px;
+                width: 90%;
+                max-width: 450px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                z-index: 2001;
+                display: none;
+                animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            #popular-items-panel {
+                background: var(--primary);
+                color: white;
+            }
+
+            #popular-items-panel .top-selling-title {
+                color: white;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+                font-size: 1.2rem;
+            }
+
+            @keyframes modalIn {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -45%) scale(0.95);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+
+            #current-bill-panel.modal-card {
+                position: fixed;
+                top: auto;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                transform: translateY(100%);
+                width: 100%;
+                max-width: none;
+                max-height: 80vh;
+                border-radius: 24px 24px 0 0;
+                display: block;
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                padding: 20px;
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+                background: white !important;
+                color: var(--primary) !important;
+                margin: 0;
+            }
+
+            #current-bill-panel.modal-card.open {
+                transform: translateY(0);
+            }
+
+            .floating-cart-btn {
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                background: var(--accent);
+                color: white;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                box-shadow: 0 10px 25px rgba(230, 126, 34, 0.4);
+                cursor: pointer;
+                z-index: 1500;
+                border: 3px solid white;
+                animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .cart-badge {
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background: #e74c3c;
+                color: white;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                font-size: 0.75rem;
+                font-weight: 800;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid white;
+            }
+
+            @keyframes popIn {
+                from {
+                    transform: scale(0);
+                }
+
+                to {
+                    transform: scale(1);
+                }
+            }
+
+            /* Detailed History Modal Specifics */
+            #history-items-panel {
+                max-width: 600px;
+                max-height: 85vh;
+                overflow: hidden;
+                display: none;
+                flex-direction: column;
+            }
+
+            .history-scroll-area {
+                overflow-y: auto;
+                flex: 1;
+                padding-right: 5px;
+            }
+
+            .detailed-bill-card {
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 15px;
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .bill-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                padding-bottom: 8px;
+                border-bottom: 1px dashed #dee2e6;
+            }
+
+            .bill-id {
+                font-weight: 800;
+                color: var(--primary);
+                font-size: 0.9rem;
+            }
+
+            .bill-time {
+                font-size: 0.75rem;
+                color: var(--text-muted);
+            }
+
+            .bill-items-list {
+                font-size: 0.85rem;
+                color: #555;
+            }
+
+            .bill-item-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 4px;
+            }
+
+            .bill-footer {
+                margin-top: 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: 700;
+                color: var(--primary);
             }
 
             .summary-panel {
@@ -1047,13 +1481,21 @@
 <body>
 
     <header>
+        <button class="menu-toggle" onclick="window.toggleSidebar()" title="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
         <div class="header-content">
-            <h1>Hotel Daily Sales</h1>
+            <h1>Amma Mess</h1>
             <p id="current-date-display"></p>
         </div>
-        <button class="menu-manage-btn" onclick="toggleManagePanel()" title="Manage Menu">
-            <i class="fas fa-edit"></i>
-        </button>
+        <div class="header-actions">
+            <button class="header-btn popular" onclick="window.togglePopularView()" title="Popular Today">
+                <i class="fas fa-fire"></i>
+            </button>
+            <button class="header-btn manage" onclick="window.toggleManagePanel()" title="Manage Menu">
+                <i class="fas fa-edit"></i>
+            </button>
+        </div>
     </header>
 
     <div class="container">
@@ -1120,17 +1562,7 @@
             </button>
         </div>
 
-        <!-- Payment Method Selector -->
-        <div class="payment-selector">
-            <button class="payment-btn cash active" onclick="switchPayment('cash')" id="btn-pay-cash">
-                <i class="fas fa-money-bill-wave"></i>
-                <span>Cash Payment</span>
-            </button>
-            <button class="payment-btn online" onclick="switchPayment('online')" id="btn-pay-online">
-                <i class="fas fa-mobile-alt"></i>
-                <span>Online Payment</span>
-            </button>
-        </div>
+
 
         <h2 class="section-title">Session Menu</h2>
 
@@ -1152,6 +1584,63 @@
                 <p style="font-size: 0.9rem;">No orders yet today.</p>
             </div>
         </div>
+
+        <!-- Floating Cart Button (Mobile) -->
+        <div id="floating-cart" class="floating-cart-btn" onclick="window.toggleCart()" style="display: none;">
+            <i class="fas fa-receipt"></i>
+            <div class="cart-badge" id="cart-count">0</div>
+        </div>
+
+        <!-- Digital Bill / Temporary Cart -->
+        <section id="current-bill-panel" class="modal-card"
+            style="display: none; background: #fff; color: var(--primary); border: 2px solid var(--accent); margin-top: 2rem;">
+            <div class="summary-header"
+                style="border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button onclick="window.toggleCart()"
+                        style="background: #f8f9fa; border: 1px solid #ddd; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); cursor: pointer;">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <h2 style="color: var(--primary); margin: 0;"><i class="fas fa-receipt"
+                            style="color: var(--accent);"></i> Ready to Bill</h2>
+                </div>
+                <button onclick="window.clearCart()"
+                    style="background:none; border:none; color:#e74c3c; font-weight:600; cursor:pointer;">Clear
+                    All</button>
+            </div>
+
+            <div id="current-bill-items" style="margin-bottom: 20px;">
+                <!-- Cart items injected here -->
+            </div>
+
+            <!-- Payment Method Inside Bill Panel -->
+            <div class="payment-selector" style="margin-bottom: 15px; background: #f8f9fa; border: 1px solid #eee;">
+                <button class="payment-btn cash active" onclick="window.switchPayment('cash')" id="bill-pay-cash"
+                    style="padding: 10px; font-size: 0.85rem;">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Cash</span>
+                </button>
+                <button class="payment-btn online" onclick="window.switchPayment('online')" id="bill-pay-online"
+                    style="padding: 10px; font-size: 0.85rem;">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Online</span>
+                </button>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 2px solid #f0f0f0;">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Bill Total
+                    </div>
+                    <div id="bill-total-amount" style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">₹0
+                    </div>
+                </div>
+                <button id="confirm-bill-btn" class="save-item-btn" style="margin: 0; background: var(--success);"
+                    onclick="window.confirmBill()">
+                    <i class="fas fa-check-circle"></i> Confirm Order
+                </button>
+            </div>
+        </section>
 
         <!-- Today's Summary -->
         <section class="summary-panel">
@@ -1178,30 +1667,38 @@
                 </div>
             </div>
 
-            <!-- Report Actions -->
-            <div class="analytics-actions">
-                <button class="report-btn" onclick="window.generatePDFReport()">
-                    <i class="fas fa-file-pdf"></i> Daily PDF
-                </button>
-                <button class="report-btn" onclick="window.toggleMonthlyView()">
-                    <i class="fas fa-calendar-check"></i> Monthly View
-                </button>
-            </div>
+
+
         </section>
 
         <!-- Monthly Analysis Panel -->
         <div id="modal-bg" class="modal-overlay" onclick="window.toggleMonthlyView()"></div>
         <div id="monthly-view-panel" class="monthly-card">
             <div class="monthly-header">
-                <h3><i class="fas fa-chart-pie" style="color: var(--accent);"></i> Monthly Sales</h3>
+                <h3><i class="fas fa-file-invoice" style="color: var(--accent);"></i> Reports History</h3>
                 <button class="close-btn" onclick="window.toggleMonthlyView()"
                     style="border:none; background:none; font-size:1.8rem; cursor:pointer; color: #999;">&times;</button>
             </div>
 
-            <div class="month-picker-container">
-                <input type="month" id="month-picker" class="month-input">
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button id="btn-daily-report" class="session-btn active" style="flex:1; padding: 8px;"
+                    onclick="window.switchReportMode('daily')">Daily</button>
+                <button id="btn-monthly-report" class="session-btn" style="flex:1; padding: 8px;"
+                    onclick="window.switchReportMode('monthly')">Monthly</button>
+            </div>
+
+            <div class="month-picker-container" id="daily-picker-container">
+                <input type="date" id="history-date-picker" class="month-input">
                 <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
-                    onclick="window.fetchMonthlyStats()">
+                    onclick="window.fetchHistoryStats()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="month-picker-container" id="monthly-picker-container" style="display: none;">
+                <input type="month" id="history-month-picker" class="month-input">
+                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
+                    onclick="window.fetchHistoryStats()">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
@@ -1234,6 +1731,79 @@
                 <p>No data found for this month.</p>
             </div>
         </div>
+        <!-- Sidebar Menu -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>Amma Mess</h2>
+                <button onclick="window.toggleSidebar()"
+                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item" onclick="window.toggleSidebar()">
+                    <i class="fas fa-home"></i> Home Dashboard
+                </button>
+                <button class="nav-item" onclick="window.togglePopularView(); window.toggleSidebar();">
+                    <i class="fas fa-fire"></i> Most Popular
+                </button>
+                <button class="nav-item" onclick="window.toggleMonthlyView(); window.toggleSidebar();">
+                    <i class="fas fa-calendar-day"></i> Reports History
+                </button>
+                <button class="nav-item" onclick="window.toggleManagePanel(); window.toggleSidebar();">
+                    <i class="fas fa-utensils"></i> Manage Menu
+                </button>
+                <button class="nav-item" onclick="window.toggleHistoryView(); window.toggleSidebar();">
+                    <i class="fas fa-history"></i> Sales History
+                </button>
+                <button class="nav-item" onclick="window.generatePDFReport(); window.toggleSidebar();">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+                <div
+                    style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; opacity: 0.5; text-align: center;">
+                    Amma Mess v2.0
+                </div>
+            </nav>
+        </div>
+
+        <!-- Popular Items Modal -->
+        <div id="popular-modal-bg" class="modal-overlay" onclick="window.togglePopularView()"></div>
+        <div id="popular-items-panel" class="modal-card">
+            <div class="modal-header"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-fire" style="color: #e67e22;"></i> Most Popular Today
+                </h3>
+                <button onclick="window.togglePopularView()"
+                    style="background:none; border:none; color:#ccc; font-size:1.8rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="top-selling-items-container">
+                <!-- Data injected here -->
+            </div>
+            <div style="text-align:center; margin-top: 20px;">
+                <button class="report-btn" style="width:100%; border-color: rgba(255,255,255,0.3);"
+                    onclick="window.togglePopularView()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed History Modal -->
+    <div id="history-modal-bg" class="modal-overlay" onclick="window.toggleHistoryView()"></div>
+    <div id="history-items-panel" class="modal-card">
+        <div class="modal-header"
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h3 style="margin:0; display:flex; align-items:center; gap:10px; color: var(--primary);">
+                <i class="fas fa-history" style="color: var(--accent);"></i> Detailed History
+            </h3>
+            <button onclick="window.toggleHistoryView()"
+                style="background:none; border:none; color:#999; font-size:1.8rem; cursor:pointer;">&times;</button>
+        </div>
+        <div class="history-scroll-area" id="detailed-history-container">
+            <!-- Detailed Bills Injected Here -->
+        </div>
+        <div style="margin-top: 20px;">
+            <button class="report-btn" style="width:100%;" onclick="window.toggleHistoryView()">Close</button>
+        </div>
+    </div>
     </div>
 
     <div id="toast">Order saved successfully!</div>
@@ -1277,6 +1847,7 @@
         let currentSession = 'morning';
         let currentPaymentMethod = 'cash';
         let editingItemId = null;
+        let cart = []; // New: Temporary Cart
         const today = new Date().toISOString().split('T')[0];
 
         // Display today's date
@@ -1408,16 +1979,36 @@
                         <h3>${item.name}</h3>
                         <div class="price">₹${item.price}</div>
                     </div>
-                    <div class="item-controls">
-                        <input type="number" class="qty-input" value="1" min="1" id="qty-${item.name.replace(/\s+/g, '-')}" onfocus="this.select()">
-                        <button class="add-btn" onclick="window.processOrder('${item.name}', ${item.price})">
-                            <i class="fas fa-plus"></i> ADD
-                        </button>
+                    <div class="item-controls-container">
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', -1)">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" class="qty-input" value="1" min="1" id="qty-${item.name.replace(/\s+/g, '-')}" onfocus="this.select()">
+                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', 1)">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="item-controls">
+                            <button class="add-btn" onclick="window.processOrder('${item.name}', ${item.price})">
+                                <i class="fas fa-plus"></i> ADD
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
             container.appendChild(card);
         }
+
+        window.adjustQty = (idName, amount) => {
+            const input = document.getElementById(`qty-${idName}`);
+            if (input) {
+                let current = parseInt(input.value) || 1;
+                let newValue = current + amount;
+                if (newValue < 1) newValue = 1;
+                input.value = newValue;
+            }
+        };
 
         window.deleteItem = async (id, name) => {
             if (confirm(`Are you sure you want to delete "${name}"?`)) {
@@ -1449,40 +2040,141 @@
         };
 
         /**
-         * Process and save order
+         * Process and add item to temporary cart
          */
-        window.processOrder = async (name, price) => {
+        window.processOrder = (name, price) => {
             const qtyInput = document.getElementById(`qty-${name.replace(/\s+/g, '-')}`);
             const quantity = parseInt(qtyInput.value) || 0;
 
             if (quantity <= 0) return;
 
-            const total = price * quantity;
-
-            try {
-                // Disable button during saving
-                const btn = qtyInput.nextElementSibling;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-                await addDoc(collection(db, "orders"), {
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity += quantity;
+                existingItem.total = existingItem.price * existingItem.quantity;
+            } else {
+                cart.push({
                     name: name,
                     price: price,
                     quantity: quantity,
-                    total: total,
+                    total: price * quantity
+                });
+            }
+
+            qtyInput.value = 1; // Reset qty
+            renderCart();
+            showToast(`Added ${quantity}x ${name} to bill`);
+        };
+
+        window.clearCart = () => {
+            if (confirm("Clear all items from bill?")) {
+                cart = [];
+                renderCart();
+            }
+        };
+
+        window.renderCart = () => {
+            const cartContainer = document.getElementById('current-bill-items');
+            const cartPanel = document.getElementById('current-bill-panel');
+            const cartTotal = document.getElementById('bill-total-amount');
+            const floatingCart = document.getElementById('floating-cart');
+            const cartCount = document.getElementById('cart-count');
+
+            if (cart.length === 0) {
+                cartPanel.style.display = 'none';
+                cartPanel.classList.remove('open');
+                if (floatingCart) floatingCart.style.display = 'none';
+                return;
+            }
+
+            // Desktop view or mobile drawer logic
+            if (window.innerWidth > 768) {
+                cartPanel.style.display = 'block';
+            } else {
+                cartPanel.style.display = 'block'; // Ensure it's reachable for the drawer
+                if (floatingCart) {
+                    floatingCart.style.display = 'flex';
+                    cartCount.textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
+                }
+            }
+
+            cartContainer.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.total;
+                const div = document.createElement('div');
+                div.className = 'order-item';
+                div.style.borderBottom = '1px solid #f0f0f0';
+                div.innerHTML = `
+                    <div class="order-details-row">
+                        <div class="order-main-info">
+                            <span class="order-name-qty" style="font-size: 0.9rem;">${item.name} (x${item.quantity})</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="order-total-price" style="font-size: 0.9rem;">₹${item.total}</span>
+                            <button class="delete-order-btn" onclick="window.removeFromCart(${index})" style="font-size: 0.9rem;">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                cartContainer.appendChild(div);
+            });
+
+            cartTotal.textContent = `₹${total.toLocaleString('en-IN')}`;
+        };
+
+        window.toggleCart = () => {
+            const cartPanel = document.getElementById('current-bill-panel');
+            cartPanel.classList.toggle('open');
+        };
+
+        window.removeFromCart = (index) => {
+            cart.splice(index, 1);
+            renderCart();
+            if (cart.length === 0 && window.innerWidth <= 768) {
+                document.getElementById('current-bill-panel').classList.remove('open');
+            }
+        };
+
+        window.confirmBill = async () => {
+            if (cart.length === 0) return;
+
+            const btn = document.getElementById('confirm-bill-btn');
+            const originalText = btn.innerHTML;
+
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                const totalBill = cart.reduce((sum, i) => sum + i.total, 0);
+                const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
+
+                // Save as a single Bill document
+                await addDoc(collection(db, "orders"), {
+                    items: cart,
+                    name: `Bill (${cart.length} items)`,
+                    total: totalBill,
+                    quantity: totalQty,
                     session: currentSession,
                     paymentMethod: currentPaymentMethod,
                     date: today,
-                    timestamp: new Date() // Use local date for immediate UI ordering if index is missing
+                    timestamp: serverTimestamp()
                 });
 
-                showToast(`Added ${quantity}x ${name}`);
-                qtyInput.value = 1; // Reset qty
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-plus"></i> ADD';
+                showToast("Bill Confirmed & Saved!");
+                cart = [];
+                if (window.innerWidth <= 768) {
+                    document.getElementById('current-bill-panel').classList.remove('open');
+                }
+                renderCart();
             } catch (error) {
-                console.error("Error adding order: ", error);
-                alert("Failed to save order. Check console for details.");
+                console.error("Error confirming bill:", error);
+                alert("Failed to save bill.");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         };
 
@@ -1519,9 +2211,10 @@
                 docs.forEach((order) => {
                     const orderId = order.id;
                     const amount = (order.total || 0);
+                    const qty = (order.quantity || 0);
 
                     totalAmount += amount;
-                    totalItems += (order.quantity || 0);
+                    totalItems += qty;
 
                     if (order.paymentMethod === 'online') {
                         onlineAmount += amount;
@@ -1545,7 +2238,13 @@
                         try {
                             const date = order.timestamp.toDate ? order.timestamp.toDate() : new Date(order.timestamp);
                             timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        } catch (e) { /* timestamp might be null briefly while saving */ }
+                        } catch (e) { }
+                    }
+
+                    // Build Summary String for history
+                    let summaryText = order.name || 'Order';
+                    if (order.items && order.items.length > 0) {
+                        summaryText = order.items.map(i => `${i.name} (x${i.quantity})`).join(', ');
                     }
 
                     // Render order item in line-wise mode
@@ -1555,13 +2254,15 @@
                         <div class="order-num">#${docs.length - (currentIndex - 1)}</div>
                         <div class="payment-status-dot dot-${order.paymentMethod || 'cash'}" title="${order.paymentMethod}"></div>
                         <div class="order-details-row">
-                            <div class="order-main-info">
-                                <span class="order-name-qty" style="font-size: 0.8rem;">${order.name} (${order.quantity})</span>
+                            <div class="order-main-info" style="flex: 1; overflow: hidden;">
+                                <span class="order-name-qty" style="font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 180px;">
+                                    ${summaryText}
+                                </span>
                                 ${timeStr ? `<span class="order-time-tag" style="font-size: 0.65rem;">${timeStr}</span>` : ''}
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
-                                <span class="order-total-price" style="font-size: 0.8rem;">₹${amount}</span>
-                                <button class="delete-order-btn" onclick="window.deleteOrder('${orderId}', '${order.name}')" style="font-size: 0.8rem;">
+                                <span class="order-total-price" style="font-size: 0.8rem; font-weight: 800;">₹${amount}</span>
+                                <button class="delete-order-btn" onclick="window.deleteOrder('${orderId}', 'Bill #${docs.length - (currentIndex - 1)}')" style="font-size: 0.8rem;">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -1575,6 +2276,98 @@
                 document.getElementById('summary-cash-amount').textContent = `₹${cashAmount.toLocaleString('en-IN')}`;
                 document.getElementById('summary-online-amount').textContent = `₹${onlineAmount.toLocaleString('en-IN')}`;
                 document.getElementById('summary-items-count').textContent = totalItems;
+
+                // --- Calculate & Render Top Selling Items ---
+                const itemStats = {};
+                docs.forEach(order => {
+                    if (order.items) {
+                        order.items.forEach(item => {
+                            const itemName = item.name || 'Unknown';
+                            const qty = parseInt(item.quantity) || 0;
+                            itemStats[itemName] = (itemStats[itemName] || 0) + qty;
+                        });
+                    } else {
+                        // Backward compatibility
+                        const itemName = order.name || 'Unknown';
+                        const qty = parseInt(order.quantity) || 0;
+                        itemStats[itemName] = (itemStats[itemName] || 0) + qty;
+                    }
+                });
+
+                // --- Populate Detailed History Modal ---
+                const detailedHistoryContainer = document.getElementById('detailed-history-container');
+                if (detailedHistoryContainer) {
+                    detailedHistoryContainer.innerHTML = '';
+                    if (docs.length === 0) {
+                        detailedHistoryContainer.innerHTML = '<p style="text-align:center; opacity:0.5; padding:20px;">No sales recorded yet today.</p>';
+                    } else {
+                        docs.forEach((order, idx) => {
+                            let timeStr = "---";
+                            if (order.timestamp) {
+                                try {
+                                    const date = order.timestamp.toDate ? order.timestamp.toDate() : new Date(order.timestamp);
+                                    timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                } catch (e) { }
+                            }
+
+                            const billCard = document.createElement('div');
+                            billCard.className = 'detailed-bill-card';
+
+                            let itemsHTML = '';
+                            if (order.items) {
+                                order.items.forEach(it => {
+                                    itemsHTML += `<div class="bill-item-row"><span>${it.name} (x${it.quantity})</span><span>₹${it.total}</span></div>`;
+                                });
+                            } else {
+                                itemsHTML = `<div class="bill-item-row"><span>${order.name} (x${order.quantity})</span><span>₹${order.total}</span></div>`;
+                            }
+
+                            billCard.innerHTML = `
+                                <div class="bill-header">
+                                    <span class="bill-id">#${docs.length - idx} Bill</span>
+                                    <span class="bill-time"><i class="far fa-clock"></i> ${timeStr}</span>
+                                </div>
+                                <div class="bill-items-list">${itemsHTML}</div>
+                                <div class="bill-footer">
+                                    <span style="font-size:0.7rem; color:${order.paymentMethod === 'online' ? '#3498db' : '#27ae60'}">
+                                        <i class="fas fa-credit-card"></i> ${order.paymentMethod?.toUpperCase() || 'CASH'}
+                                    </span>
+                                    <span>Total: ₹${order.total}</span>
+                                </div>
+                            `;
+                            detailedHistoryContainer.appendChild(billCard);
+                        });
+                    }
+                }
+
+                const sortedItems = Object.entries(itemStats)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5); // Show top 5
+
+                const topItemsContainer = document.getElementById('top-selling-items-container');
+                if (topItemsContainer) {
+                    topItemsContainer.innerHTML = '';
+                    const maxQty = sortedItems.length > 0 ? sortedItems[0][1] : 0;
+
+                    if (sortedItems.length === 0) {
+                        topItemsContainer.innerHTML = '<p style="font-size: 0.8rem; opacity: 0.6; text-align: center; padding: 10px;">No items sold yet today.</p>';
+                    } else {
+                        sortedItems.forEach(([name, qty]) => {
+                            const width = maxQty > 0 ? (qty / maxQty) * 100 : 0;
+                            topItemsContainer.innerHTML += `
+                                <div class="top-item-row">
+                                    <div class="top-item-info">
+                                        <span>${name}</span>
+                                        <span>${qty} Qty</span>
+                                    </div>
+                                    <div class="top-item-bar-bg">
+                                        <div class="top-item-bar-fill" style="width: ${width}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
 
                 // Store today's data globally for PDF generation
                 window.todayOrders = docs;
@@ -1596,7 +2389,7 @@
             // Header
             doc.setFontSize(22);
             doc.setTextColor(44, 62, 80);
-            doc.text("Hotel Daily Sales Report", 14, 20);
+            doc.text("Amma Mess Sales Report", 14, 20);
 
             doc.setFontSize(12);
             doc.setTextColor(127, 140, 141);
@@ -1615,14 +2408,31 @@
                     doc.text(`${session.charAt(0).toUpperCase() + session.slice(1)} Sales`, 14, currentY);
                     currentY += 5;
 
-                    const tableData = sessionOrders.map((o, i) => [
-                        i + 1,
-                        o.name,
-                        o.quantity,
-                        `Rs. ${o.price}`,
-                        `Rs. ${o.total}`,
-                        o.paymentMethod?.toUpperCase() || 'CASH'
-                    ]);
+                    const tableData = [];
+                    sessionOrders.forEach(o => {
+                        if (o.items) {
+                            o.items.forEach(item => {
+                                tableData.push([
+                                    '', // No individual number to keep it grouped visually
+                                    item.name,
+                                    item.quantity,
+                                    `Rs. ${item.price}`,
+                                    `Rs. ${item.total}`,
+                                    o.paymentMethod?.toUpperCase() || 'CASH'
+                                ]);
+                            });
+                            // Add a separator or subtotal if needed, but keeping it simple for now
+                        } else {
+                            tableData.push([
+                                '',
+                                o.name,
+                                o.quantity,
+                                `Rs. ${o.price}`,
+                                `Rs. ${o.total}`,
+                                o.paymentMethod?.toUpperCase() || 'CASH'
+                            ]);
+                        }
+                    });
 
                     doc.autoTable({
                         startY: currentY,
@@ -1653,8 +2463,40 @@
             doc.text(`Online Total: ${onlineText}`, 14, currentY + 16);
 
             // Save
-            doc.save(`Hotel_Report_${today}.pdf`);
+            doc.save(`Amma_Mess_Report_${today}.pdf`);
             showToast("PDF Downloaded with Session Breaks!");
+        };
+
+        window.togglePopularView = () => {
+            const panel = document.getElementById('popular-items-panel');
+            const bg = document.getElementById('popular-modal-bg');
+            const isShowing = panel.style.display === 'block';
+
+            panel.style.display = isShowing ? 'none' : 'block';
+            bg.style.display = isShowing ? 'none' : 'block';
+        };
+
+        window.toggleHistoryView = () => {
+            const panel = document.getElementById('history-items-panel');
+            const bg = document.getElementById('history-modal-bg');
+            const isShowing = panel.style.display === 'flex';
+
+            panel.style.display = isShowing ? 'none' : 'flex';
+            bg.style.display = isShowing ? 'none' : 'block';
+        };
+
+        window.toggleSidebar = () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const isOpen = sidebar.classList.contains('open');
+
+            if (isOpen) {
+                sidebar.classList.remove('open');
+                overlay.style.display = 'none';
+            } else {
+                sidebar.classList.add('open');
+                overlay.style.display = 'block';
+            }
         };
 
         /**
@@ -1674,15 +2516,28 @@
 
                 // Pre-fill and auto-fetch
                 const now = new Date();
-                const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-                document.getElementById('month-picker').value = monthStr;
-                window.fetchMonthlyStats();
+                const dateStr = now.toISOString().split('T')[0];
+                document.getElementById('history-date-picker').value = dateStr;
+                window.fetchHistoryStats();
             }
         };
 
-        window.fetchMonthlyStats = async () => {
-            const monthInput = document.getElementById('month-picker').value;
-            if (!monthInput) return;
+        let reportMode = 'daily';
+        window.switchReportMode = (mode) => {
+            reportMode = mode;
+            document.getElementById('btn-daily-report').classList.toggle('active', mode === 'daily');
+            document.getElementById('btn-monthly-report').classList.toggle('active', mode === 'monthly');
+            document.getElementById('daily-picker-container').style.display = mode === 'daily' ? 'flex' : 'none';
+            document.getElementById('monthly-picker-container').style.display = mode === 'monthly' ? 'flex' : 'none';
+            document.getElementById('monthly-results').style.display = 'none';
+        };
+
+        window.fetchHistoryStats = async () => {
+            const dateInput = document.getElementById('history-date-picker').value;
+            const monthInput = document.getElementById('history-month-picker').value;
+
+            const target = reportMode === 'daily' ? dateInput : monthInput;
+            if (!target) return;
 
             const loader = document.getElementById('month-loader');
             const results = document.getElementById('monthly-results');
@@ -1694,7 +2549,9 @@
             if (noData) noData.style.display = 'none';
 
             try {
-                // Fetch all today's orders or all orders if needed (filtering in JS for stability)
+                // For monthly, we fetch all and filter client-side for simplicity/no-extra-index
+                // or we could use where with >= and < but date strings make it tricky.
+                // Re-using the manual filtering logic.
                 const q = query(collection(db, "orders"));
                 const querySnapshot = await getDocs(q);
 
@@ -1702,7 +2559,14 @@
 
                 querySnapshot.forEach((docSnap) => {
                     const data = docSnap.data();
-                    if (data.date && data.date.startsWith(monthInput)) {
+                    const orderDate = data.date; // YYYY-MM-DD
+
+                    if (reportMode === 'daily' && orderDate === dateInput) {
+                        rev += (data.total || 0);
+                        cnt += (data.quantity || 0);
+                        if (data.paymentMethod === 'online') onl += (data.total || 0);
+                        else csh += (data.total || 0);
+                    } else if (reportMode === 'monthly' && orderDate && orderDate.startsWith(monthInput)) {
                         rev += (data.total || 0);
                         cnt += (data.quantity || 0);
                         if (data.paymentMethod === 'online') onl += (data.total || 0);
@@ -1732,10 +2596,10 @@
          * Delete an order
          */
         window.deleteOrder = async (id, name) => {
-            if (confirm(`Remove the order for "${name}"?`)) {
+            if (confirm(`Remove this ${name}?`)) {
                 try {
                     await deleteDoc(doc(db, "orders", id));
-                    showToast(`Order for "${name}" removed.`);
+                    showToast(`${name} removed.`);
                 } catch (error) {
                     console.error("Error deleting order:", error);
                     alert("Failed to remove order.");
@@ -1748,11 +2612,16 @@
          */
         window.switchPayment = (method) => {
             currentPaymentMethod = method;
+
+            // Update payment buttons in the bill panel
             document.querySelectorAll('.payment-btn').forEach(btn => btn.classList.remove('active'));
+
             if (method === 'cash') {
-                document.getElementById('btn-pay-cash').classList.add('active');
+                const billBtn = document.getElementById('bill-pay-cash');
+                if (billBtn) billBtn.classList.add('active');
             } else {
-                document.getElementById('btn-pay-online').classList.add('active');
+                const billBtn = document.getElementById('bill-pay-online');
+                if (billBtn) billBtn.classList.add('active');
             }
         };
 
