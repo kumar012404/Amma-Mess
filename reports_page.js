@@ -322,3 +322,19 @@ document.getElementById('history-month-picker').value = dateStr.substring(0, 7);
 
 // Fetch stats automatically for today
 window.fetchHistoryStats();
+
+// Sidebar Navigation Toggle
+window.toggleSidebar = () => {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar && overlay) {
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+            sidebar.classList.remove('open');
+            overlay.style.display = 'none';
+        } else {
+            sidebar.classList.add('open');
+            overlay.style.display = 'block';
+        }
+    }
+};
