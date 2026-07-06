@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales History - Amma Mess</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body style="background: #f8fafc; color: var(--primary); min-height: 100vh; padding-bottom: 50px;">
+
+    <header style="margin-bottom: 2rem; background: linear-gradient(135deg, var(--primary), #1a252f); color: white; padding: 1.2rem 2rem; border-radius: 0 0 24px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <a href="index.html" style="background: rgba(255,255,255,0.15); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem; transition: background 0.3s;" title="Back to Billing">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 style="font-size: 1.5rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-history" style="color: var(--accent);"></i> Sales History (Today)
+            </h1>
+        </div>
+        <div id="current-date-display" style="font-size: 0.95rem; font-weight: 600; opacity: 0.9;"></div>
+    </header>
+
+    <main class="container">
+        <div class="card" style="padding: 30px; border-radius: 24px; background: white; box-shadow: 0 15px 40px rgba(0,0,0,0.05);">
+            <div id="history-loader" style="text-align:center; padding: 40px;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 2.5rem; color: var(--accent);"></i>
+                <p style="margin-top: 15px; font-size: 1rem; color: var(--text-muted);">Loading Sales History...</p>
+            </div>
+
+            <div id="history-no-data" style="display:none; text-align:center; padding: 30px; color: #888; font-size: 1.1rem;">
+                <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 10px; color: #ccc;"></i>
+                <p>No sales recorded yet today.</p>
+            </div>
+
+            <div id="detailed-history-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <!-- Detailed Bills Injected Here -->
+            </div>
+        </div>
+    </main>
+
+    <div id="toast">Order updated!</div>
+
+    <style>
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+                padding: 1.2rem 1.5rem !important;
+            }
+            header div:last-of-type {
+                font-size: 0.85rem !important;
+                opacity: 0.8 !important;
+                margin-left: 55px;
+            }
+            main.container {
+                padding: 0 10px !important;
+            }
+            .card {
+                padding: 20px 15px !important;
+            }
+            #detailed-history-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+        }
+    </style>
+
+    <script type="module" src="history_page.js"></script>
+</body>
+</html>

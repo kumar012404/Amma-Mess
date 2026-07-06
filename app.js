@@ -973,21 +973,7 @@ window.toggleRecentOrders = (btn) => {
     }
 };
 
-window.toggleHistoryView = () => {
-    const panel = document.getElementById('history-items-panel');
-    const bg = document.getElementById('history-modal-bg');
-    const isShowing = panel.classList.contains('open');
-
-    if (isShowing) {
-        panel.classList.remove('open');
-        panel.style.display = 'none';
-        bg.style.display = 'none';
-    } else {
-        panel.classList.add('open');
-        panel.style.display = 'flex';
-        bg.style.display = 'block';
-    }
-};
+// Note: toggleHistoryView has been moved to history.html and history_page.js as a separate page.
 
 window.toggleSidebar = () => {
     const sidebar = document.getElementById('sidebar');

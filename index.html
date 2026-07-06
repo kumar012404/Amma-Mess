@@ -347,9 +347,9 @@
                 <button class="nav-item" onclick="window.toggleManagePanel(); window.toggleSidebar();">
                     <i class="fas fa-utensils"></i> Manage Menu
                 </button>
-                <button class="nav-item" onclick="window.toggleHistoryView(); window.toggleSidebar();">
+                <a href="history.html" class="nav-item" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
                     <i class="fas fa-history"></i> Sales History
-                </button>
+                </a>
                 <button class="nav-item" onclick="window.generatePDFReport(); window.toggleSidebar();">
                     <i class="fas fa-file-pdf"></i> Download PDF
                 </button>
@@ -380,27 +380,6 @@
                     onclick="window.togglePopularView()">Close</button>
             </div>
         </div>
-    </div>
-
-    <!-- Detailed History Modal -->
-    <div id="history-modal-bg" class="modal-overlay" onclick="window.toggleHistoryView()"></div>
-    <div id="history-items-panel" class="modal-card">
-        <div class="modal-header"
-            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-            <h3 style="margin:0; display:flex; align-items:center; gap:10px; color: var(--primary);">
-                <i class="fas fa-history" style="color: var(--accent);"></i> Detailed History
-            </h3>
-            <button onclick="window.toggleHistoryView()" class="close-btn" style="background:none; color:#999;">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="history-scroll-area" id="detailed-history-container">
-            <!-- Detailed Bills Injected Here -->
-        </div>
-        <div style="margin-top: 20px;">
-            <button class="report-btn" style="width:100%;" onclick="window.toggleHistoryView()">Close</button>
-        </div>
-    </div>
     </div>
 
     <div id="toast">Order saved successfully!</div>
