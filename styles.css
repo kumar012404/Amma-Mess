@@ -1818,7 +1818,8 @@
                 top: 50% !important;
                 left: 50% !important;
                 transform: translate(-50%, -50%) !important;
-                max-width: 650px !important;
+                width: 90% !important;
+                max-width: 950px !important;
                 padding: 35px !important;
                 background: white;
                 border-radius: 28px;
