@@ -1975,9 +1975,13 @@
                 border-bottom: none !important;
                 margin: 0 !important;
                 z-index: 2500 !important;
-                display: flex !important;
+                display: none !important;
                 flex-direction: column !important;
                 animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            }
+
+            body.cart-open #current-bill-panel.modal-card {
+                display: flex !important;
             }
 
             /* Smoothly shift container to the left when cart is open */
