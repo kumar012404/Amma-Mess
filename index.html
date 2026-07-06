@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amma Mess Tracker</title>
+    <link rel="icon" href="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f35b.png" type="image/png">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <header>
+        <button class="menu-toggle" onclick="window.toggleSidebar()" title="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-content">
+            <h1>Amma Mess</h1>
+            <p id="current-date-display"></p>
+        </div>
+        <div class="header-actions">
+
+            <button class="header-btn manage" onclick="window.toggleManagePanel()" title="Manage Menu">
+                <i class="fas fa-edit"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Manage Items Panel (Hidden by default) -->
+        <section id="manage-panel" class="manage-panel" style="display: none;">
+            <div class="panel-header">
+                <h3><i class="fas fa-plus-circle"></i> Add New Menu Item</h3>
+                <button class="close-btn" onclick="toggleManagePanel()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="add-item-form" class="add-item-form">
+                <div class="form-group">
+                    <label><i class="fas fa-utensils"></i> Item Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-edit"></i>
+                        <input type="text" id="new-item-name" placeholder="e.g. Masala Dosa" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Price (₹)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-indian-rupee-sign"></i>
+                        <input type="number" id="new-item-price" placeholder="60" step="any" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-calculator"></i> Default Qty / Pieces</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="number" id="new-item-default-qty" placeholder="1" value="1" min="1" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-image"></i> Image (URL or Upload)</label>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="input-wrapper">
+                            <i class="fas fa-link"></i>
+                            <input type="url" id="new-item-image" placeholder="https://image-link.com">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+                            <label for="image-upload"
+                                style="margin: 0; padding: 8px 16px; background: rgba(230, 126, 34, 0.1); border: 1px dashed var(--accent); border-radius: 8px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; color: var(--accent); transition: all 0.3s;">
+                                <i class="fas fa-upload"></i> Upload Image File
+                            </label>
+                            <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                            <span id="upload-status"
+                                style="font-size: 0.75rem; color: var(--text-muted); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">No
+                                file chosen</span>
+                        </div>
+                        <div id="image-preview-container"
+                            style="display: none; position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: hidden; margin-top: 8px; border: 1px solid #edf2f7; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                            <img id="image-preview" style="width: 100%; height: 100%; object-fit: cover;">
+                            <button type="button" id="remove-uploaded-image"
+                                style="position: absolute; top: 4px; right: 4px; background: rgba(231, 76, 60, 0.9); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">&times;</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-clock"></i> Session</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar-day"></i>
+                        <select id="new-item-session" required>
+                            <option value="morning">Morning</option>
+                            <option value="afternoon">Afternoon</option>
+                            <option value="night">Night</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="save-btn-container">
+                    <button type="submit" class="save-item-btn">
+                        <i class="fas fa-cloud-upload-alt"></i> Save to Menu
+                    </button>
+                </div>
+            </form>
+
+            <div class="manage-list-section"
+                style="margin-top: 3rem; border-top: 2px dashed #f0f2f5; padding-top: 2rem;">
+                <h4 style="font-size: 1.2rem; color: var(--primary); margin-bottom: 1.5rem;">
+                    <i class="fas fa-list" style="color: var(--accent);"></i> Existing Menu Items
+                </h4>
+                <div id="manage-items-list" class="manage-items-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+                    <!-- Managed items will be injected here -->
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted); grid-column: 1/-1;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading existing items...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Session Controls -->
+        <div class="session-selector">
+            <button class="session-btn morning active" onclick="switchSession('morning')">
+                <i class="fas fa-sun"></i>
+                <span>Morning</span>
+            </button>
+            <button class="session-btn afternoon" onclick="switchSession('afternoon')">
+                <i class="fas fa-cloud-sun"></i>
+                <span>Afternoon</span>
+            </button>
+            <button class="session-btn night" onclick="switchSession('night')">
+                <i class="fas fa-moon"></i>
+                <span>Night</span>
+            </button>
+        </div>
+
+
+
+        <h2 class="section-title">Session Menu</h2>
+
+        <div id="loading-overlay" class="loading-overlay">
+            <span class="loader"></span>
+            <p style="margin-top: 1rem;">Syncing with Firestore...</p>
+        </div>
+
+        <!-- Items Display -->
+        <div id="items-container" class="items-grid">
+            <!-- Items will be injected here -->
+        </div>
+
+        <!-- Recent Orders -->
+        <h2 class="section-title">
+            Recent Orders (Today)
+            <button class="toggle-view-btn" onclick="window.toggleRecentOrders(this)" title="Toggle Recent Orders">
+                <i class="fas fa-eye-slash"></i>
+            </button>
+        </h2>
+        <div id="orders-list-container" class="orders-list" style="display: none;">
+            <!-- Orders will be injected dynamically -->
+            <div class="empty-state" style="padding: 1rem;">
+                <p style="font-size: 0.9rem;">No orders yet today.</p>
+            </div>
+        </div>
+
+        <!-- Floating Cart Button (Mobile) -->
+        <div id="floating-cart" class="floating-cart-btn" onclick="window.toggleCart()">
+            <i class="fas fa-receipt"></i>
+            <div class="cart-badge" id="cart-count">0</div>
+        </div>
+
+        <!-- Digital Bill / Temporary Cart -->
+        <section id="current-bill-panel" class="modal-card"
+            style="display: none; background: #fff; color: var(--primary); border: 2px solid var(--accent); margin-top: 2rem;">
+            <div class="summary-header"
+                style="border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button onclick="window.toggleCart()"
+                        style="background: #f8f9fa; border: 1px solid #ddd; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); cursor: pointer;">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <h2 style="color: var(--primary); margin: 0;"><i class="fas fa-receipt"
+                            style="color: var(--accent);"></i> Ready to Bill</h2>
+                </div>
+                <button id="clear-all-btn"
+                    style="background:none; border:none; color:#e74c3c; font-weight:600; cursor:pointer;">Clear
+                    All</button>
+            </div>
+
+            <div id="current-bill-items"
+                style="margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding-right: 5px; -webkit-overflow-scrolling: touch;">
+                <!-- Cart items injected here -->
+            </div>
+
+            <!-- Payment Method Inside Bill Panel -->
+            <div class="payment-selector" style="margin-bottom: 15px; background: #f8f9fa; border: 1px solid #eee;">
+                <button class="payment-btn cash active" onclick="window.switchPayment('cash')" id="bill-pay-cash"
+                    style="padding: 10px; font-size: 0.85rem;">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Cash</span>
+                </button>
+                <button class="payment-btn online" onclick="window.switchPayment('online')" id="bill-pay-online"
+                    style="padding: 10px; font-size: 0.85rem;">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Online</span>
+                </button>
+                <button class="payment-btn both" onclick="window.switchPayment('both')" id="bill-pay-both"
+                    style="padding: 10px; font-size: 0.85rem;">
+                    <i class="fas fa-coins"></i>
+                    <span>Both</span>
+                </button>
+            </div>
+
+            <!-- Both Split Inputs (Hidden by default) -->
+            <div id="both-split-container" style="display: none; margin-bottom: 15px; padding: 12px; background: #f8f9fa; border: 1px solid #eee; border-radius: 12px; flex-direction: column; gap: 8px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <span>Split Payment Details</span>
+                    <span style="font-size: 0.75rem; color: var(--accent); font-weight: 600;" id="split-total-info">Total: ₹0</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Cash Amt (₹)</span>
+                        <input type="number" id="split-cash-amount" placeholder="0" step="any" min="0" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-weight: 700; width: 100%; color: var(--success); background: white;">
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Online Amt (₹)</span>
+                        <input type="number" id="split-online-amount" placeholder="0" step="any" min="0" style="padding: 8px; border-radius: 8px; border: 1px solid #ddd; font-weight: 700; width: 100%; color: #3498db; background: white;">
+                    </div>
+                </div>
+            </div>
+
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 2px solid #f0f0f0;">
+                <div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Bill Total
+                    </div>
+                    <div id="bill-total-amount" style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">₹0
+                    </div>
+                </div>
+                <button id="confirm-bill-btn" class="save-item-btn" style="margin: 0; background: var(--success);"
+                    onclick="window.confirmBill()">
+                    <i class="fas fa-check-circle"></i> Confirm Order
+                </button>
+            </div>
+        </section>
+
+        <!-- Today's Summary -->
+        <section class="summary-panel" style="padding: 12px 15px;">
+            <div class="summary-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0;"><i class="fas fa-chart-pie" style="margin-right: 8px; font-size: 0.9rem;"></i>
+                    Today's Summary</h2>
+                <button id="toggle-summary-btn" onclick="window.toggleSummaryModal()"
+                    style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Today's Summary Modal -->
+        <div id="summary-modal-bg" class="modal-overlay" onclick="window.toggleSummaryModal()"></div>
+        <div id="summary-modal-panel" class="modal-card"
+            style="background: white !important; color: #2c3e50 !important; border: 1px solid #eee;">
+            <div class="modal-header"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; border-bottom: 2px solid #f8f9fa; padding-bottom: 15px;">
+                <h3 style="margin:0; display:flex; align-items:center; gap:10px; color: var(--primary);">
+                    <i class="fas fa-chart-line" style="color: var(--accent);"></i> Today's Sales
+                </h3>
+                <button onclick="window.toggleSummaryModal()" class="close-btn"
+                    style="background:none; color:#999; border:none; font-size:1.5rem;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="summary-stats-popup" style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                <div class="stat-box clickable"
+                    style="background: #f1f4f8 !important; border: 1px solid #e1e7ef !important; padding: 1.5rem !important; border-radius: 16px !important; display: flex !important; flex-direction: column !important; align-items: center !important;"
+                    onclick="window.toggleSummaryModal(); window.toggleHistoryView()" title="View History">
+                    <div class="stat-label"
+                        style="color: #64748b !important; font-weight: 700 !important; font-size: 0.75rem !important; text-transform: uppercase !important; margin-bottom: 5px !important;">
+                        Total Revenue</div>
+                    <div class="stat-value" id="summary-total-amount"
+                        style="font-size: 2.2rem !important; color: #1e293b !important; font-weight: 800 !important;">
+                        ₹0.00</div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="stat-box"
+                        style="background: #f0fff4 !important; border: 1px solid #c6f6d5 !important; padding: 1.2rem !important; border-radius: 16px !important; display: flex !important; flex-direction: column !important; align-items: center !important;">
+                        <div class="stat-label"
+                            style="color: #2f855a !important; font-weight: 700 !important; font-size: 0.7rem !important; text-transform: uppercase !important;">
+                            Cash</div>
+                        <div class="stat-value" id="summary-cash-amount"
+                            style="color: #27ae60 !important; font-size: 1.3rem !important; font-weight: 700 !important;">
+                            ₹0.00</div>
+                    </div>
+                    <div class="stat-box"
+                        style="background: #ebf8ff !important; border: 1px solid #bee3f8 !important; padding: 1.2rem !important; border-radius: 16px !important; display: flex !important; flex-direction: column !important; align-items: center !important;">
+                        <div class="stat-label"
+                            style="color: #2b6cb0 !important; font-weight: 700 !important; font-size: 0.7rem !important; text-transform: uppercase !important;">
+                            Online</div>
+                        <div class="stat-value" id="summary-online-amount"
+                            style="color: #3498db !important; font-size: 1.3rem !important; font-weight: 700 !important;">
+                            ₹0.00</div>
+                    </div>
+                </div>
+                <div class="stat-box"
+                    style="background: #fff !important; border: 2px dashed #e2e8f0 !important; padding: 1.2rem !important; border-radius: 16px !important; display: flex !important; flex-direction: column !important; align-items: center !important;">
+                    <div class="stat-label"
+                        style="color: #64748b !important; font-weight: 700 !important; font-size: 0.7rem !important; text-transform: uppercase !important;">
+                        Items Sold</div>
+                    <div class="stat-value" id="summary-items-count"
+                        style="font-size: 1.4rem !important; color: #1e293b !important; font-weight: 700 !important;">0
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: 25px;">
+                <button class="save-item-btn"
+                    style="width:100% !important; margin: 0 !important; background: #2c3e50 !important; color: white !important; justify-content: center !important; height: 55px !important; border-radius: 16px !important; font-size: 1.1rem !important;"
+                    onclick="window.toggleSummaryModal()">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>
+
+        <!-- Monthly Analysis Panel -->
+        <div id="modal-bg" class="modal-overlay" onclick="window.toggleMonthlyView()"></div>
+        <div id="monthly-view-panel" class="monthly-card">
+            <div class="monthly-header">
+                <h3><i class="fas fa-file-invoice" style="color: var(--accent);"></i> Reports History</h3>
+                <button class="close-btn" onclick="window.toggleMonthlyView()"
+                    style="border:none; background:none; font-size:1.8rem; cursor:pointer; color: #999;">&times;</button>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button id="btn-daily-report" class="session-btn active" style="flex:1; padding: 8px;"
+                    onclick="window.switchReportMode('daily')">Daily</button>
+                <button id="btn-monthly-report" class="session-btn" style="flex:1; padding: 8px;"
+                    onclick="window.switchReportMode('monthly')">Monthly</button>
+            </div>
+
+            <div class="month-picker-container" id="daily-picker-container">
+                <input type="date" id="history-date-picker" class="month-input">
+                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
+                    onclick="window.fetchHistoryStats()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div class="month-picker-container" id="monthly-picker-container" style="display: none;">
+                <input type="month" id="history-month-picker" class="month-input">
+                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
+                    onclick="window.fetchHistoryStats()">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <div id="monthly-results" class="monthly-grid" style="display: none;">
+                <div class="month-stat">
+                    <div class="month-label">Revenue</div>
+                    <div class="month-value" id="m-revenue">₹0</div>
+                </div>
+                <div class="month-stat">
+                    <div class="month-label">Cash</div>
+                    <div class="month-value" id="m-cash" style="color: #27ae60;">₹0</div>
+                </div>
+                <div class="month-stat">
+                    <div class="month-label">Online</div>
+                    <div class="month-value" id="m-online" style="color: #3498db;">₹0</div>
+                </div>
+                <div class="month-stat">
+                    <div class="month-label">Items</div>
+                    <div class="month-value" id="m-count">0</div>
+                </div>
+            </div>
+
+            <div id="month-loader" style="display:none; text-align:center; padding: 30px;">
+                <i class="fas fa-circle-notch fa-spin" style="font-size: 1.8rem; color: var(--accent);"></i>
+                <p style="margin-top: 10px; font-size: 0.9rem;">Fetching Data...</p>
+            </div>
+
+            <div id="month-no-data" style="display:none; text-align:center; padding: 20px; color: #888;">
+                <p>No data found for this month.</p>
+            </div>
+        </div>
+        <!-- Sidebar Menu -->
+        <div id="sidebar-overlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>Amma Mess</h2>
+                <button onclick="window.toggleSidebar()" class="close-btn" style="background:none; color:white;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item" onclick="window.toggleSidebar()">
+                    <i class="fas fa-home"></i> Home Dashboard
+                </button>
+                <button class="nav-item" onclick="window.togglePopularView(); window.toggleSidebar();">
+                    <i class="fas fa-fire"></i> Most Popular
+                </button>
+                <button class="nav-item" onclick="window.toggleMonthlyView(); window.toggleSidebar();">
+                    <i class="fas fa-calendar-day"></i> Reports History
+                </button>
+                <button class="nav-item" onclick="window.toggleManagePanel(); window.toggleSidebar();">
+                    <i class="fas fa-utensils"></i> Manage Menu
+                </button>
+                <button class="nav-item" onclick="window.toggleHistoryView(); window.toggleSidebar();">
+                    <i class="fas fa-history"></i> Sales History
+                </button>
+                <button class="nav-item" onclick="window.generatePDFReport(); window.toggleSidebar();">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+                <div
+                    style="margin-top: auto; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; opacity: 0.5; text-align: center;">
+                    Amma Mess v2.0
+                </div>
+            </nav>
+        </div>
+
+        <!-- Popular Items Modal -->
+        <div id="popular-modal-bg" class="modal-overlay" onclick="window.togglePopularView()"></div>
+        <div id="popular-items-panel" class="modal-card">
+            <div class="modal-header"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h3 style="margin:0; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-fire" style="color: #e67e22;"></i> Most Popular Today
+                </h3>
+                <button onclick="window.togglePopularView()" class="close-btn" style="background:none; color:#ccc;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="top-selling-items-container">
+                <!-- Data injected here -->
+            </div>
+            <div style="text-align:center; margin-top: 20px;">
+                <button class="report-btn" style="width:100%; border-color: rgba(255,255,255,0.3);"
+                    onclick="window.togglePopularView()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed History Modal -->
+    <div id="history-modal-bg" class="modal-overlay" onclick="window.toggleHistoryView()"></div>
+    <div id="history-items-panel" class="modal-card">
+        <div class="modal-header"
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h3 style="margin:0; display:flex; align-items:center; gap:10px; color: var(--primary);">
+                <i class="fas fa-history" style="color: var(--accent);"></i> Detailed History
+            </h3>
+            <button onclick="window.toggleHistoryView()" class="close-btn" style="background:none; color:#999;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="history-scroll-area" id="detailed-history-container">
+            <!-- Detailed Bills Injected Here -->
+        </div>
+        <div style="margin-top: 20px;">
+            <button class="report-btn" style="width:100%;" onclick="window.toggleHistoryView()">Close</button>
+        </div>
+    </div>
+    </div>
+
+    <div id="toast">Order saved successfully!</div>
+
+    <!-- Firebase SDKs (CDN Version) -->
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
