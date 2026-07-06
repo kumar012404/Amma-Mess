@@ -325,82 +325,6 @@
             </div>
         </div>
 
-        <!-- Monthly Analysis Panel -->
-        <div id="modal-bg" class="modal-overlay" onclick="window.toggleMonthlyView()"></div>
-        <div id="monthly-view-panel" class="monthly-card">
-            <div class="monthly-header">
-                <h3><i class="fas fa-file-invoice" style="color: var(--accent);"></i> Reports History</h3>
-                <button class="close-btn" onclick="window.toggleMonthlyView()"
-                    style="border:none; background:none; font-size:1.8rem; cursor:pointer; color: #999;">&times;</button>
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <button id="btn-daily-report" class="session-btn active" style="flex:1; padding: 8px;"
-                    onclick="window.switchReportMode('daily')">Daily</button>
-                <button id="btn-weekly-report" class="session-btn" style="flex:1; padding: 8px;"
-                    onclick="window.switchReportMode('weekly')">Weekly</button>
-                <button id="btn-monthly-report" class="session-btn" style="flex:1; padding: 8px;"
-                    onclick="window.switchReportMode('monthly')">Monthly</button>
-            </div>
-
-            <div class="month-picker-container" id="daily-picker-container">
-                <input type="date" id="history-date-picker" class="month-input">
-                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
-                    onclick="window.fetchHistoryStats()">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            <div class="month-picker-container" id="weekly-picker-container" style="display: none;">
-                <input type="date" id="history-week-picker" class="month-input" title="Choose starting date of the week">
-                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
-                    onclick="window.fetchHistoryStats()">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            <div class="month-picker-container" id="monthly-picker-container" style="display: none;">
-                <input type="month" id="history-month-picker" class="month-input">
-                <button class="save-item-btn" style="padding: 10px 15px; margin: 0; font-size: 0.9rem;"
-                    onclick="window.fetchHistoryStats()">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-
-            <div id="monthly-results" class="monthly-grid" style="display: none;">
-                <div class="month-stat">
-                    <div class="month-label">Revenue</div>
-                    <div class="month-value" id="m-revenue">₹0</div>
-                </div>
-                <div class="month-stat">
-                    <div class="month-label">Cash</div>
-                    <div class="month-value" id="m-cash" style="color: #27ae60;">₹0</div>
-                </div>
-                <div class="month-stat">
-                    <div class="month-label">Online</div>
-                    <div class="month-value" id="m-online" style="color: #3498db;">₹0</div>
-                </div>
-                <div class="month-stat">
-                    <div class="month-label">Items</div>
-                    <div class="month-value" id="m-count">0</div>
-                </div>
-            </div>
-
-            <div id="monthly-results-download" style="display: none; margin-top: 15px;">
-                <button class="report-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s;" onclick="window.downloadCustomReportPDF()">
-                    <i class="fas fa-file-pdf"></i> Download PDF Report
-                </button>
-            </div>
-
-            <div id="month-loader" style="display:none; text-align:center; padding: 30px;">
-                <i class="fas fa-circle-notch fa-spin" style="font-size: 1.8rem; color: var(--accent);"></i>
-                <p style="margin-top: 10px; font-size: 0.9rem;">Fetching Data...</p>
-            </div>
-
-            <div id="month-no-data" style="display:none; text-align:center; padding: 20px; color: #888;">
-                <p>No data found.</p>
-            </div>
-        </div>
         <!-- Sidebar Menu -->
         <div id="sidebar-overlay" class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
         <div id="sidebar" class="sidebar">
@@ -417,9 +341,9 @@
                 <button class="nav-item" onclick="window.togglePopularView(); window.toggleSidebar();">
                     <i class="fas fa-fire"></i> Most Popular
                 </button>
-                <button class="nav-item" onclick="window.toggleMonthlyView(); window.toggleSidebar();">
+                <a href="reports.html" class="nav-item" style="text-decoration: none; display: flex; align-items: center; gap: 15px;">
                     <i class="fas fa-calendar-day"></i> Reports History
-                </button>
+                </a>
                 <button class="nav-item" onclick="window.toggleManagePanel(); window.toggleSidebar();">
                     <i class="fas fa-utensils"></i> Manage Menu
                 </button>
