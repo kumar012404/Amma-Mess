@@ -1022,6 +1022,8 @@ window.toggleMonthlyView = () => {
         const now = new Date();
         const dateStr = now.toISOString().split('T')[0];
         document.getElementById('history-date-picker').value = dateStr;
+        document.getElementById('history-week-picker').value = dateStr;
+        document.getElementById('history-month-picker').value = dateStr.substring(0, 7);
         window.fetchHistoryStats();
     }
 };
@@ -1030,70 +1032,201 @@ let reportMode = 'daily';
 window.switchReportMode = (mode) => {
     reportMode = mode;
     document.getElementById('btn-daily-report').classList.toggle('active', mode === 'daily');
+    document.getElementById('btn-weekly-report').classList.toggle('active', mode === 'weekly');
     document.getElementById('btn-monthly-report').classList.toggle('active', mode === 'monthly');
+    
     document.getElementById('daily-picker-container').style.display = mode === 'daily' ? 'flex' : 'none';
+    document.getElementById('weekly-picker-container').style.display = mode === 'weekly' ? 'flex' : 'none';
     document.getElementById('monthly-picker-container').style.display = mode === 'monthly' ? 'flex' : 'none';
+    
     document.getElementById('monthly-results').style.display = 'none';
+    document.getElementById('monthly-results-download').style.display = 'none';
 };
 
 window.fetchHistoryStats = async () => {
     const dateInput = document.getElementById('history-date-picker').value;
+    const weekInput = document.getElementById('history-week-picker').value;
     const monthInput = document.getElementById('history-month-picker').value;
 
-    const target = reportMode === 'daily' ? dateInput : monthInput;
+    let target = '';
+    if (reportMode === 'daily') target = dateInput;
+    else if (reportMode === 'weekly') target = weekInput;
+    else if (reportMode === 'monthly') target = monthInput;
+
     if (!target) return;
 
     const loader = document.getElementById('month-loader');
     const results = document.getElementById('monthly-results');
+    const downloadContainer = document.getElementById('monthly-results-download');
     const noData = document.getElementById('month-no-data');
 
     // Show loading
     loader.style.display = 'block';
     results.style.display = 'none';
+    downloadContainer.style.display = 'none';
     if (noData) noData.style.display = 'none';
 
     try {
-        // For monthly, we fetch all and filter client-side for simplicity/no-extra-index
-        // or we could use where with >= and < but date strings make it tricky.
-        // Re-using the manual filtering logic.
         const q = query(collection(db, "orders"));
         const querySnapshot = await getDocs(q);
 
         let rev = 0, csh = 0, onl = 0, cnt = 0;
+        const matchingOrders = [];
+
+        let startDate, endDate;
+        if (reportMode === 'weekly') {
+            startDate = new Date(weekInput);
+            startDate.setHours(0, 0, 0, 0);
+            endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            endDate.setHours(23, 59, 59, 999);
+        }
 
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
-            const orderDate = data.date; // YYYY-MM-DD
+            const orderDate = data.date;
+            if (!orderDate) return;
 
+            let matches = false;
             if (reportMode === 'daily' && orderDate === dateInput) {
+                matches = true;
+            } else if (reportMode === 'weekly') {
+                const orderTime = new Date(orderDate);
+                orderTime.setHours(0, 0, 0, 0);
+                if (orderTime >= startDate && orderTime <= endDate) {
+                    matches = true;
+                }
+            } else if (reportMode === 'monthly' && orderDate.startsWith(monthInput)) {
+                matches = true;
+            }
+
+            if (matches) {
+                matchingOrders.push({ id: docSnap.id, ...data });
                 rev += (data.total || 0);
                 cnt += (data.quantity || 0);
-                if (data.paymentMethod === 'online') onl += (data.total || 0);
-                else csh += (data.total || 0);
-            } else if (reportMode === 'monthly' && orderDate && orderDate.startsWith(monthInput)) {
-                rev += (data.total || 0);
-                cnt += (data.quantity || 0);
-                if (data.paymentMethod === 'online') onl += (data.total || 0);
-                else csh += (data.total || 0);
+                
+                if (data.paymentMethod === 'online') {
+                    onl += (data.total || 0);
+                } else if (data.paymentMethod === 'both') {
+                    onl += (data.onlineAmount || 0);
+                    csh += (data.cashAmount || 0);
+                } else {
+                    csh += (data.total || 0);
+                }
             }
         });
+
+        // Store globally
+        window.fetchedHistoryOrders = matchingOrders;
+        window.fetchedHistoryTitle = reportMode === 'daily' ? `Daily Report (${dateInput})` : (reportMode === 'weekly' ? `Weekly Report (${weekInput} to ${new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]})` : `Monthly Report (${monthInput})`);
 
         loader.style.display = 'none';
 
         if (rev === 0) {
             if (noData) noData.style.display = 'block';
         } else {
-            document.getElementById('m-revenue').textContent = `₹${rev.toLocaleString('en-IN')}`;
-            document.getElementById('m-cash').textContent = `₹${csh.toLocaleString('en-IN')}`;
-            document.getElementById('m-online').textContent = `₹${onl.toLocaleString('en-IN')}`;
+            document.getElementById('m-revenue').textContent = `₹${window.customRound(rev).toLocaleString('en-IN')}`;
+            document.getElementById('m-cash').textContent = `₹${window.customRound(csh).toLocaleString('en-IN')}`;
+            document.getElementById('m-online').textContent = `₹${window.customRound(onl).toLocaleString('en-IN')}`;
             document.getElementById('m-count').textContent = cnt;
             results.style.display = 'grid';
+            downloadContainer.style.display = 'block';
         }
     } catch (err) {
-        console.error("Monthly Fetch Error:", err);
+        console.error("Fetch Error:", err);
         loader.style.display = 'none';
         alert("Data sync error. Please try again.");
     }
+};
+
+window.downloadCustomReportPDF = () => {
+    if (!window.fetchedHistoryOrders || window.fetchedHistoryOrders.length === 0) {
+        alert("No data available to export.");
+        return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(44, 62, 80);
+    doc.text("Amma Mess Sales Report", 14, 20);
+
+    doc.setFontSize(12);
+    doc.setTextColor(127, 140, 141);
+    doc.text(window.fetchedHistoryTitle || "Sales Report", 14, 30);
+    doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}`, 14, 36);
+
+    const tableData = [];
+    let idx = 1;
+    let grandTotal = 0;
+    let grandCash = 0;
+    let grandOnline = 0;
+
+    window.fetchedHistoryOrders.forEach(o => {
+        const orderDate = o.date || "Unknown Date";
+        const sessionName = o.session || "morning";
+        const paymentType = o.paymentMethod || "cash";
+        const orderTotal = o.total || 0;
+        
+        grandTotal += orderTotal;
+        if (paymentType === 'online') {
+            grandOnline += orderTotal;
+        } else if (paymentType === 'both') {
+            grandOnline += (o.onlineAmount || 0);
+            grandCash += (o.cashAmount || 0);
+        } else {
+            grandCash += orderTotal;
+        }
+
+        if (o.items) {
+            o.items.forEach(item => {
+                tableData.push([
+                    idx++,
+                    orderDate,
+                    sessionName.toUpperCase(),
+                    item.name,
+                    item.quantity,
+                    `Rs. ${window.customRound(item.price)}`,
+                    `Rs. ${window.customRound(item.total)}`,
+                    paymentType.toUpperCase()
+                ]);
+            });
+        } else {
+            tableData.push([
+                idx++,
+                orderDate,
+                sessionName.toUpperCase(),
+                o.name,
+                o.quantity,
+                `Rs. ${window.customRound(o.price)}`,
+                `Rs. ${window.customRound(o.total)}`,
+                paymentType.toUpperCase()
+            ]);
+        }
+    });
+
+    doc.autoTable({
+        startY: 44,
+        head: [['#', 'Date', 'Session', 'Item Name', 'Qty', 'Price', 'Total', 'Payment']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [44, 62, 80] },
+    });
+
+    const finalY = doc.lastAutoTable.finalY + 15;
+
+    // Footer Summary
+    doc.setFontSize(14);
+    doc.setTextColor(44, 62, 80);
+    doc.text(`Total Sales: Rs. ${window.customRound(grandTotal).toLocaleString('en-IN')}`, 14, finalY);
+    doc.text(`Cash portion: Rs. ${window.customRound(grandCash).toLocaleString('en-IN')}`, 14, finalY + 8);
+    doc.text(`Online portion: Rs. ${window.customRound(grandOnline).toLocaleString('en-IN')}`, 14, finalY + 16);
+
+    const filename = `Amma_Mess_Report_${(window.fetchedHistoryTitle || "Report").replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
+    doc.save(filename);
+    showToast("PDF Report downloaded!");
 };
 
 /**
