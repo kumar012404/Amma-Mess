@@ -39,6 +39,13 @@ let cart = []; // New: Temporary Cart
 window.currentItemStats = {}; // Global track for popular items
 const today = new Date().toISOString().split('T')[0];
 
+// Custom Rounding: > 0.4 decimal rounds up, <= 0.4 decimal rounds down
+window.customRound = (val) => {
+    const floorVal = Math.floor(val);
+    const decimal = Number((val - floorVal).toFixed(4));
+    return decimal > 0.4 ? Math.ceil(val) : floorVal;
+};
+
 // Display today's date
 document.getElementById('current-date-display').textContent = new Date().toLocaleDateString('en-GB', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -541,7 +548,7 @@ window.renderCart = () => {
         });
     });
 
-    cartTotal.textContent = `₹${Number(total.toFixed(2)).toLocaleString('en-IN')}`;
+    cartTotal.textContent = `₹${window.customRound(total).toLocaleString('en-IN')}`;
 };
 
 window.toggleCart = () => {
@@ -591,7 +598,7 @@ window.confirmBill = async () => {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
-        const totalBill = cart.reduce((sum, i) => sum + i.total, 0);
+        const totalBill = window.customRound(cart.reduce((sum, i) => sum + i.total, 0));
         const totalQty = cart.reduce((sum, i) => sum + i.quantity, 0);
 
         let cashAmt = 0;
@@ -1120,14 +1127,14 @@ window.switchPayment = (method) => {
     if (splitContainer) {
         if (method === 'both') {
             splitContainer.style.display = 'flex';
-            const totalBill = cart.reduce((sum, i) => sum + i.total, 0);
-            document.getElementById('split-total-info').textContent = `Total: ₹${Number(totalBill.toFixed(2))}`;
+            const totalBill = window.customRound(cart.reduce((sum, i) => sum + i.total, 0));
+            document.getElementById('split-total-info').textContent = `Total: ₹${totalBill}`;
             
             const cashInput = document.getElementById('split-cash-amount');
             const onlineInput = document.getElementById('split-online-amount');
-            const half = Number((totalBill / 2).toFixed(2));
+            const half = Math.floor(totalBill / 2);
             cashInput.value = half;
-            onlineInput.value = Number((totalBill - half).toFixed(2));
+            onlineInput.value = totalBill - half;
         } else {
             splitContainer.style.display = 'none';
         }
@@ -1222,7 +1229,7 @@ const splitOnlineInput = document.getElementById('split-online-amount');
 
 if (splitCashInput && splitOnlineInput) {
     splitCashInput.addEventListener('input', () => {
-        const totalBill = cart.reduce((sum, i) => sum + i.total, 0);
+        const totalBill = window.customRound(cart.reduce((sum, i) => sum + i.total, 0));
         let cashAmt = parseFloat(splitCashInput.value) || 0;
         if (cashAmt > totalBill) {
             cashAmt = totalBill;
@@ -1233,11 +1240,11 @@ if (splitCashInput && splitOnlineInput) {
             splitCashInput.value = 0;
         }
         const onlineAmt = totalBill - cashAmt;
-        splitOnlineInput.value = Number(onlineAmt.toFixed(2));
+        splitOnlineInput.value = window.customRound(onlineAmt);
     });
 
     splitOnlineInput.addEventListener('input', () => {
-        const totalBill = cart.reduce((sum, i) => sum + i.total, 0);
+        const totalBill = window.customRound(cart.reduce((sum, i) => sum + i.total, 0));
         let onlineAmt = parseFloat(splitOnlineInput.value) || 0;
         if (onlineAmt > totalBill) {
             onlineAmt = totalBill;
@@ -1248,7 +1255,7 @@ if (splitCashInput && splitOnlineInput) {
             splitOnlineInput.value = 0;
         }
         const cashAmt = totalBill - onlineAmt;
-        splitCashInput.value = Number(cashAmt.toFixed(2));
+        splitCashInput.value = window.customRound(cashAmt);
     });
 }
 
