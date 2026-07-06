@@ -8,7 +8,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 10px !important;
+                padding: 1.2rem 1.5rem !important;
+            }
+            header div:last-of-type {
+                font-size: 0.85rem !important;
+                opacity: 0.8 !important;
+                margin-left: 55px; /* aligns roughly with title */
+            }
+            .monthly-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+            }
+            .month-stat {
+                padding: 15px !important;
+            }
+            .month-value {
+                font-size: 1.4rem !important;
+            }
+            main.container {
+                padding: 0 10px !important;
+            }
+            .card {
+                padding: 20px 15px !important;
+            }
+            #detailed-history-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 </head>
 <body style="background: #f8fafc; color: var(--primary); min-height: 100vh; padding-bottom: 50px;">
 
