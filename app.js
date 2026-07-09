@@ -323,19 +323,27 @@ function renderItemCard(item, id, isPopular = false) {
 
     card.innerHTML = `
                 ${popularBadge}
-                <img src="${imageUrl}" alt="${item.name}" class="item-image" style="cursor: pointer;" onclick="window.processOrder('${item.name.replace(/'/g, "\\'")}', ${item.price}, ${item.defaultQty || 1})" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
+                <img src="${imageUrl}" alt="${item.name}" class="item-image" style="cursor: pointer;" onclick="window.processOrder('${item.name.replace(/'/g, "\\'")}'  , ${item.price}, ${item.defaultQty || 1})" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
                 <div class="item-details">
                     <div class="item-info">
                         <h3>${item.name}</h3>
                         <div class="price" id="price-${item.name.replace(/\s+/g, '-')}">₹${item.price}</div>
                     </div>
                     <div class="item-controls-container">
+                        ${(item.defaultQty || 1) > 1 ? `
+                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                            <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted); white-space:nowrap;">Sets (1 set = ${item.defaultQty}):</span>
+                            <input type="number" min="1" value="1" id="sets-${item.name.replace(/\s+/g, '-')}" data-set-size="${item.defaultQty}"
+                                style="width:52px; padding:3px 6px; border-radius:8px; border:1px solid #ddd; font-size:0.85rem; text-align:center;"
+                                oninput="window.setsChanged('${item.name.replace(/\s+/g, '-')}')"
+                                onfocus="this.select()">
+                        </div>` : ''}
                         <div class="qty-selector">
-                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', -1)">
+                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', -${item.defaultQty || 1})">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <input type="number" class="qty-input" value="${item.defaultQty || 1}" min="1" id="qty-${item.name.replace(/\s+/g, '-')}" data-price="${item.price}" data-default-qty="${item.defaultQty || 1}" oninput="window.updateCardPrice('${item.name.replace(/\s+/g, '-')}')" onfocus="this.select()">
-                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', 1)">
+                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', ${item.defaultQty || 1})">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>
@@ -363,6 +371,17 @@ window.updateCardPrice = (idName) => {
     }
 };
 
+window.setsChanged = (idName) => {
+    const setsInput = document.getElementById(`sets-${idName}`);
+    const qtyInput = document.getElementById(`qty-${idName}`);
+    if (setsInput && qtyInput) {
+        const setSize = parseInt(setsInput.getAttribute('data-set-size')) || 1;
+        const sets = parseInt(setsInput.value) || 1;
+        qtyInput.value = sets * setSize;
+        window.updateCardPrice(idName);
+    }
+};
+
 window.adjustQty = (idName, amount) => {
     const input = document.getElementById(`qty-${idName}`);
     if (input) {
@@ -370,6 +389,12 @@ window.adjustQty = (idName, amount) => {
         let newValue = current + amount;
         if (newValue < 1) newValue = 1;
         input.value = newValue;
+        // Sync sets input if present
+        const setsInput = document.getElementById(`sets-${idName}`);
+        if (setsInput) {
+            const setSize = parseInt(setsInput.getAttribute('data-set-size')) || 1;
+            setsInput.value = Math.round(newValue / setSize) || 1;
+        }
         window.updateCardPrice(idName);
     }
 };
@@ -875,7 +900,9 @@ window.generatePDFReport = () => {
     let currentY = 40;
 
     sessions.forEach(session => {
-        const sessionOrders = window.todayOrders.filter(o => (o.session || 'morning') === session);
+        const sessionOrders = window.todayOrders
+            .filter(o => (o.session || 'morning') === session)
+            .sort((a, b) => (a.timestamp?.seconds || 0) - (b.timestamp?.seconds || 0));
 
         if (sessionOrders.length > 0) {
             // Session Header
@@ -885,40 +912,48 @@ window.generatePDFReport = () => {
             currentY += 5;
 
             const tableData = [];
+            let orderIdx = 1;
             sessionOrders.forEach(o => {
-                if (o.items) {
-                    o.items.forEach(item => {
-                        tableData.push([
-                            '', // No individual number to keep it grouped visually
-                            item.name,
-                            item.quantity,
-                            `Rs. ${item.price}`,
-                            `Rs. ${item.total}`,
-                            o.paymentMethod?.toUpperCase() || 'CASH'
-                        ]);
-                    });
-                    // Add a separator or subtotal if needed, but keeping it simple for now
+                const paymentLabel = o.paymentMethod === 'both' 
+                    ? `SPLIT (Cash: ${window.customRound(o.cashAmount)}, Online: ${window.customRound(o.onlineAmount)})` 
+                    : o.paymentMethod?.toUpperCase() || 'CASH';
+
+                let itemsSummary = '';
+                let totalQty = 0;
+
+                if (o.items && o.items.length > 0) {
+                    itemsSummary = o.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+                    totalQty = o.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
                 } else {
-                    tableData.push([
-                        '',
-                        o.name,
-                        o.quantity,
-                        `Rs. ${o.price}`,
-                        `Rs. ${o.total}`,
-                        o.paymentMethod?.toUpperCase() || 'CASH'
-                    ]);
+                    itemsSummary = `${o.name || 'Unknown Item'} (x${o.quantity || 1})`;
+                    totalQty = o.quantity || 1;
                 }
+
+                tableData.push([
+                    `${orderIdx}`,
+                    itemsSummary,
+                    totalQty,
+                    `Rs. ${window.customRound(o.total || 0)}`,
+                    paymentLabel
+                ]);
+                orderIdx++;
             });
 
             doc.autoTable({
                 startY: currentY,
-                head: [['#', 'Item Name', 'Qty', 'Price', 'Total', 'Payment']],
+                head: [['#', 'Item Name', 'Qty', 'Total', 'Payment']],
                 body: tableData,
                 theme: 'striped',
                 headStyles: { fillColor: [44, 62, 80] },
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    2: { cellWidth: 15, halign: 'center' },
+                    3: { cellWidth: 25 },
+                    4: { cellWidth: 40 }
+                }
             });
 
-            currentY = doc.lastAutoTable.finalY + 15;
+            currentY = doc.lastAutoTable.finalY + 6;
 
             if (currentY > 260) {
                 doc.addPage();
@@ -927,20 +962,66 @@ window.generatePDFReport = () => {
         }
     });
 
-    // Footer Summary
-    doc.setFontSize(14);
-    doc.setTextColor(44, 62, 80);
+    // Payment Summary — above item table
+    let paymentY = currentY + 4;
+    if (paymentY > 250) {
+        doc.addPage();
+        paymentY = 20;
+    }
+
     const totalText = document.getElementById('summary-total-amount').textContent.replace('₹', 'Rs. ');
     const cashText = document.getElementById('summary-cash-amount').textContent.replace('₹', 'Rs. ');
     const onlineText = document.getElementById('summary-online-amount').textContent.replace('₹', 'Rs. ');
 
-    doc.text(`Total Sales: ${totalText}`, 14, currentY);
-    doc.text(`Cash Total: ${cashText}`, 14, currentY + 8);
-    doc.text(`Online Total: ${onlineText}`, 14, currentY + 16);
+    doc.setFontSize(12);
+    doc.setTextColor(44, 62, 80);
+    doc.text(`Total Sales: ${totalText}`, 14, paymentY);
+    doc.text(`Cash Total: ${cashText}`, 14, paymentY + 7);
+    doc.text(`Online Total: ${onlineText}`, 14, paymentY + 14);
+
+    // Item-wise Summary — below payment totals
+    const itemTotals = {};
+    window.todayOrders.forEach(o => {
+        if (o.items && o.items.length > 0) {
+            o.items.forEach(item => {
+                const name = item.name || 'Unknown';
+                itemTotals[name] = (itemTotals[name] || 0) + (item.quantity || 0);
+            });
+        } else if (o.name) {
+            itemTotals[o.name] = (itemTotals[o.name] || 0) + (o.quantity || 0);
+        }
+    });
+
+    let itemSummaryY = paymentY + 24;
+    if (itemSummaryY > 250) {
+        doc.addPage();
+        itemSummaryY = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setTextColor(230, 126, 34);
+    doc.text('Item-wise Sales Summary', 14, itemSummaryY);
+
+    const itemSummaryData = Object.entries(itemTotals)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, qty]) => [name, `${qty} nos`]);
+
+    doc.autoTable({
+        startY: itemSummaryY + 5,
+        head: [['Item Name', 'Total Qty Sold']],
+        body: itemSummaryData,
+        theme: 'striped',
+        headStyles: { fillColor: [44, 62, 80] },
+        styles: { halign: 'left' },
+        columnStyles: {
+            1: { halign: 'center', fontStyle: 'bold' }
+        },
+        tableWidth: 'auto'
+    });
 
     // Save
     doc.save(`Amma_Mess_Report_${today}.pdf`);
-    showToast("PDF Downloaded with Session Breaks!");
+    showToast("PDF Downloaded!");
 };
 
 window.togglePopularView = () => {

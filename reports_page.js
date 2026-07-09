@@ -236,11 +236,11 @@ window.downloadCustomReportPDF = () => {
     doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}`, 14, 36);
 
     const tableData = [];
-    let idx = 1;
     let grandTotal = 0;
     let grandCash = 0;
     let grandOnline = 0;
 
+    let orderIdx = 1;
     window.fetchedHistoryOrders.forEach(o => {
         const orderDate = o.date || "Unknown Date";
         const sessionName = o.session || "morning";
@@ -257,49 +257,103 @@ window.downloadCustomReportPDF = () => {
             grandCash += orderTotal;
         }
 
-        if (o.items) {
-            o.items.forEach(item => {
-                tableData.push([
-                    idx++,
-                    orderDate,
-                    sessionName.toUpperCase(),
-                    item.name,
-                    item.quantity,
-                    `Rs. ${window.customRound(item.price)}`,
-                    `Rs. ${window.customRound(item.total)}`,
-                    paymentType === 'both' ? `SPLIT (Cash: ${window.customRound(o.cashAmount)}, Online: ${window.customRound(o.onlineAmount)})` : paymentType.toUpperCase()
-                ]);
-            });
+        const paymentLabel = paymentType === 'both' 
+            ? `SPLIT (Cash: ${window.customRound(o.cashAmount)}, Online: ${window.customRound(o.onlineAmount)})` 
+            : paymentType.toUpperCase();
+
+        let itemsSummary = '';
+        let totalQty = 0;
+
+        if (o.items && o.items.length > 0) {
+            itemsSummary = o.items.map(item => `${item.name} (x${item.quantity})`).join(', ');
+            totalQty = o.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
         } else {
-            tableData.push([
-                idx++,
-                orderDate,
-                sessionName.toUpperCase(),
-                o.name,
-                o.quantity,
-                `Rs. ${window.customRound(o.price)}`,
-                `Rs. ${window.customRound(o.total)}`,
-                paymentType === 'both' ? `SPLIT (Cash: ${window.customRound(o.cashAmount)}, Online: ${window.customRound(o.onlineAmount)})` : paymentType.toUpperCase()
-            ]);
+            itemsSummary = `${o.name || 'Unknown Item'} (x${o.quantity || 1})`;
+            totalQty = o.quantity || 1;
         }
+
+        tableData.push([
+            `${orderIdx}`,
+            orderDate,
+            sessionName.toUpperCase(),
+            itemsSummary,
+            totalQty,
+            `Rs. ${window.customRound(o.total || 0)}`,
+            paymentLabel
+        ]);
+        orderIdx++;
     });
 
     doc.autoTable({
         startY: 44,
-        head: [['#', 'Date', 'Session', 'Item Name', 'Qty', 'Price', 'Total', 'Payment']],
+        head: [['#', 'Date', 'Session', 'Item Name', 'Qty', 'Total', 'Payment']],
         body: tableData,
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
+        columnStyles: {
+            0: { cellWidth: 8 },
+            1: { cellWidth: 22 },
+            2: { cellWidth: 18 },
+            4: { cellWidth: 12, halign: 'center' },
+            5: { cellWidth: 22 },
+            6: { cellWidth: 35 }
+        }
     });
 
-    const finalY = doc.lastAutoTable.finalY + 15;
+    const finalY = doc.lastAutoTable.finalY + 5;
 
-    // Footer Summary
-    doc.setFontSize(14);
+    // Payment Summary — above item table
+    let paymentY = finalY;
+    if (paymentY > 250) {
+        doc.addPage();
+        paymentY = 20;
+    }
+
+    doc.setFontSize(12);
     doc.setTextColor(44, 62, 80);
-    doc.text(`Total Sales: Rs. ${window.customRound(grandTotal).toLocaleString('en-IN')}`, 14, finalY);
-    doc.text(`Cash portion: Rs. ${window.customRound(grandCash).toLocaleString('en-IN')}`, 14, finalY + 8);
-    doc.text(`Online portion: Rs. ${window.customRound(grandOnline).toLocaleString('en-IN')}`, 14, finalY + 16);
+    doc.text(`Total Sales: Rs. ${window.customRound(grandTotal).toLocaleString('en-IN')}`, 14, paymentY);
+    doc.text(`Cash portion: Rs. ${window.customRound(grandCash).toLocaleString('en-IN')}`, 14, paymentY + 7);
+    doc.text(`Online portion: Rs. ${window.customRound(grandOnline).toLocaleString('en-IN')}`, 14, paymentY + 14);
+
+    // Item-wise Summary — below payment totals
+    const itemTotals = {};
+    window.fetchedHistoryOrders.forEach(o => {
+        if (o.items && o.items.length > 0) {
+            o.items.forEach(item => {
+                const name = item.name || 'Unknown';
+                itemTotals[name] = (itemTotals[name] || 0) + (item.quantity || 0);
+            });
+        } else if (o.name) {
+            itemTotals[o.name] = (itemTotals[o.name] || 0) + (o.quantity || 0);
+        }
+    });
+
+    let itemSummaryY = paymentY + 24;
+    if (itemSummaryY > 250) {
+        doc.addPage();
+        itemSummaryY = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.setTextColor(230, 126, 34);
+    doc.text('Item-wise Sales Summary', 14, itemSummaryY);
+
+    const itemSummaryData = Object.entries(itemTotals)
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, qty]) => [name, `${qty} nos`]);
+
+    doc.autoTable({
+        startY: itemSummaryY + 5,
+        head: [['Item Name', 'Total Qty Sold']],
+        body: itemSummaryData,
+        theme: 'striped',
+        headStyles: { fillColor: [44, 62, 80] },
+        styles: { halign: 'left' },
+        columnStyles: {
+            1: { halign: 'center', fontStyle: 'bold' }
+        },
+        tableWidth: 'auto'
+    });
 
     const filename = `Amma_Mess_Report_${(window.fetchedHistoryTitle || "Report").replace(/[^a-zA-Z0-9]/g, "_")}.pdf`;
     doc.save(filename);
