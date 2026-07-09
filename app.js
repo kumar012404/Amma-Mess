@@ -334,7 +334,7 @@ function renderItemCard(item, id, isPopular = false) {
                         <div style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:2px; margin-bottom:4px;">
                             <span style="font-size:0.65rem; font-weight:600; color:var(--text-muted); white-space:nowrap;">Sets (${item.defaultQty}):</span>
                             <input type="number" min="1" value="1" id="sets-${item.name.replace(/\s+/g, '-')}" data-set-size="${item.defaultQty}"
-                                style="width:32px; padding:1px 2px; border-radius:4px; border:1px solid #cbd5e1; font-size:0.75rem; text-align:center; height:20px;"
+                                style="width:44px; padding:1px 2px; border-radius:4px; border:1px solid #cbd5e1; font-size:0.75rem; text-align:center; height:20px;"
                                 oninput="window.setsChanged('${item.name.replace(/\s+/g, '-')}')"
                                 onfocus="this.select()">
                         </div>` : ''}
