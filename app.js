@@ -325,9 +325,9 @@ function renderItemCard(item, id, isPopular = false) {
                 ${popularBadge}
                 <img src="${imageUrl}" alt="${item.name}" class="item-image" style="cursor: pointer;" onclick="window.processOrder('${item.name.replace(/'/g, "\\'")}'  , ${item.price}, ${item.defaultQty || 1})" onerror="this.src='https://via.placeholder.com/300x150?text=No+Image'">
                 <div class="item-details">
-                    <div class="item-info">
-                        <h3>${item.name}</h3>
-                        <div class="price" id="price-${item.name.replace(/\s+/g, '-')}">₹${item.price}</div>
+                    <div class="item-info" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:4px;">
+                        <h3 style="margin:0; font-size:0.95rem; font-weight:700;">${item.name}</h3>
+                        <div class="price" id="price-${item.name.replace(/\s+/g, '-')}" style="font-size:0.95rem; font-weight:700; color:var(--accent); margin:0;">₹${item.price}</div>
                     </div>
                     <div class="item-controls-container">
                         ${(item.defaultQty || 1) > 1 ? `
