@@ -1238,3 +1238,18 @@ if (splitCashInput && splitOnlineInput) {
 
 fetchItems(currentSession);
 startSummaryListener();
+
+// Auto-open panels based on URL parameters (from other pages' sidebars)
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    if (action === 'popular') {
+        setTimeout(() => {
+            if (typeof window.togglePopularView === 'function') window.togglePopularView();
+        }, 600);
+    } else if (action === 'manage') {
+        setTimeout(() => {
+            if (typeof window.toggleManagePanel === 'function') window.toggleManagePanel();
+        }, 600);
+    }
+});
