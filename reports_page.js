@@ -49,16 +49,64 @@ window.switchReportMode = (mode) => {
     document.getElementById('monthly-picker-container').style.display = mode === 'monthly' ? 'flex' : 'none';
     
     document.getElementById('monthly-results').style.display = 'none';
+
+    if (mode === 'weekly') {
+        populateWeekDropdown();
+    }
+};
+
+function populateWeekDropdown() {
+    const select = document.getElementById('history-week-select');
+    select.innerHTML = '<option value="">-- Select a Week --</option>';
+
+    const fmt = (d) => d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+
+    // Find the most recent Wednesday on or before today
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Sun,1=Mon,...,3=Wed
+    // Days since last Wednesday (Wed=3)
+    const daysSinceWed = (dayOfWeek + 7 - 3) % 7;
+    const latestWed = new Date(today);
+    latestWed.setDate(today.getDate() - daysSinceWed);
+    latestWed.setHours(0, 0, 0, 0);
+
+    // Generate 16 weeks back
+    for (let i = 0; i < 16; i++) {
+        const wed = new Date(latestWed);
+        wed.setDate(latestWed.getDate() - i * 7);
+        const mon = new Date(wed);
+        mon.setDate(wed.getDate() + 5); // Wed + 5 = Monday
+
+        const fromVal = wed.toISOString().split('T')[0];
+        const toVal = mon.toISOString().split('T')[0];
+        const label = `Wed ${fmt(wed)} → Mon ${fmt(mon)}`;
+
+        const opt = document.createElement('option');
+        opt.value = `${fromVal}|${toVal}`;
+        opt.textContent = label;
+        select.appendChild(opt);
+    }
+}
+
+window.onWeekSelected = () => {
+    const select = document.getElementById('history-week-select');
+    const val = select.value;
+    if (val) {
+        const [from, to] = val.split('|');
+        document.getElementById('history-week-from').value = from;
+        document.getElementById('history-week-to').value = to;
+    }
 };
 
 window.fetchHistoryStats = async () => {
     const dateInput = document.getElementById('history-date-picker').value;
-    const weekInput = document.getElementById('history-week-picker').value;
+    const weekFrom = document.getElementById('history-week-from').value;
+    const weekTo = document.getElementById('history-week-to').value;
     const monthInput = document.getElementById('history-month-picker').value;
 
     let target = '';
     if (reportMode === 'daily') target = dateInput;
-    else if (reportMode === 'weekly') target = weekInput;
+    else if (reportMode === 'weekly') target = weekFrom;
     else if (reportMode === 'monthly') target = monthInput;
 
     if (!target) {
@@ -84,10 +132,14 @@ window.fetchHistoryStats = async () => {
 
         let startDate, endDate;
         if (reportMode === 'weekly') {
-            startDate = new Date(weekInput);
+            if (!weekFrom || !weekTo) {
+                alert('Please select both From and To dates.');
+                loader.style.display = 'none';
+                return;
+            }
+            startDate = new Date(weekFrom);
             startDate.setHours(0, 0, 0, 0);
-            endDate = new Date(startDate);
-            endDate.setDate(startDate.getDate() + 6);
+            endDate = new Date(weekTo);
             endDate.setHours(23, 59, 59, 999);
         }
 
@@ -127,7 +179,11 @@ window.fetchHistoryStats = async () => {
 
         // Store matching orders globally
         window.fetchedHistoryOrders = matchingOrders;
-        window.fetchedHistoryTitle = reportMode === 'daily' ? `Daily Report (${dateInput})` : (reportMode === 'weekly' ? `Weekly Report (${weekInput} to ${new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]})` : `Monthly Report (${monthInput})`);
+        window.fetchedHistoryTitle = reportMode === 'daily'
+            ? `Daily Report (${dateInput})`
+            : reportMode === 'weekly'
+            ? `Weekly Report (${weekFrom} to ${weekTo})`
+            : `Monthly Report (${monthInput})`;
 
         loader.style.display = 'none';
 
@@ -371,7 +427,10 @@ window.downloadCustomReportPDF = () => {
 const now = new Date();
 const dateStr = now.toISOString().split('T')[0];
 document.getElementById('history-date-picker').value = dateStr;
-document.getElementById('history-week-picker').value = dateStr;
+const weekFromEl = document.getElementById('history-week-from');
+if (weekFromEl) weekFromEl.value = dateStr;
+const weekToEl = document.getElementById('history-week-to');
+if (weekToEl) weekToEl.value = dateStr;
 document.getElementById('history-month-picker').value = dateStr.substring(0, 7);
 
 // Fetch stats automatically for today

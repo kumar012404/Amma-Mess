@@ -331,19 +331,19 @@ function renderItemCard(item, id, isPopular = false) {
                     </div>
                     <div class="item-controls-container">
                         ${(item.defaultQty || 1) > 1 ? `
-                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
-                            <span style="font-size:0.72rem; font-weight:600; color:var(--text-muted); white-space:nowrap;">Sets (1 set = ${item.defaultQty}):</span>
+                        <div style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:2px; margin-bottom:4px;">
+                            <span style="font-size:0.6rem; font-weight:600; color:var(--text-muted); white-space:nowrap;">Sets (1s=${item.defaultQty}):</span>
                             <input type="number" min="1" value="1" id="sets-${item.name.replace(/\s+/g, '-')}" data-set-size="${item.defaultQty}"
-                                style="width:52px; padding:3px 6px; border-radius:8px; border:1px solid #ddd; font-size:0.85rem; text-align:center;"
+                                style="width:32px; padding:1px 2px; border-radius:4px; border:1px solid #cbd5e1; font-size:0.75rem; text-align:center; height:20px;"
                                 oninput="window.setsChanged('${item.name.replace(/\s+/g, '-')}')"
                                 onfocus="this.select()">
                         </div>` : ''}
                         <div class="qty-selector">
-                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', -${item.defaultQty || 1})">
+                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', -1)">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <input type="number" class="qty-input" value="${item.defaultQty || 1}" min="1" id="qty-${item.name.replace(/\s+/g, '-')}" data-price="${item.price}" data-default-qty="${item.defaultQty || 1}" oninput="window.updateCardPrice('${item.name.replace(/\s+/g, '-')}')" onfocus="this.select()">
-                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', ${item.defaultQty || 1})">
+                            <button class="qty-btn" onclick="window.adjustQty('${item.name.replace(/\s+/g, '-')}', 1)">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </div>

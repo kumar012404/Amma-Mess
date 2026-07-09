@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         @media (max-width: 768px) {
             header {
@@ -74,8 +75,13 @@
                 </button>
             </div>
 
-            <div class="month-picker-container" id="weekly-picker-container" style="max-width: 500px; margin: 0 auto 20px auto; display: none; gap: 10px;">
-                <input type="date" id="history-week-picker" class="month-input" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #ddd;" title="Choose starting date of the week">
+            <div class="month-picker-container" id="weekly-picker-container" style="max-width: 600px; margin: 0 auto 20px auto; display: none; gap: 10px; align-items: center;">
+                <select id="history-week-select" class="month-input" style="flex:1; padding:12px; border-radius:12px; border:1px solid #ddd; font-size:0.95rem; cursor:pointer;"
+                    onchange="window.onWeekSelected()">
+                    <option value="">-- Select a Week --</option>
+                </select>
+                <input type="hidden" id="history-week-from">
+                <input type="hidden" id="history-week-to">
                 <button class="save-item-btn" style="padding: 12px 20px; margin: 0; font-size: 1rem; border-radius: 12px;" onclick="window.fetchHistoryStats()">
                     <i class="fas fa-search"></i> Search
                 </button>
